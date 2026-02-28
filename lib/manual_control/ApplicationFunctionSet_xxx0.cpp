@@ -27,6 +27,7 @@ DeviceDriverSet_ULTRASONIC AppUltrasonic;
 SoftwareSerial BTSerial(10, 11);
 
 #define OBSTACLE_DISTANCE_CM 20  // Obstacle detected if closer than 20cm
+bool autonomous_mode = true;
 
 /*f(x) int */
 static boolean function_xxx(long x, long s, long e) //f(x)
@@ -279,6 +280,7 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
         break;
       case 100:                                                                      /*<命令：N 100>*/
         Application_OwlBotxxx0.Functional_Mode = CMD_ClearAllFunctions_Standby_mode; /*清除功能：进入空闲模式*/
+        autonomous_mode = false;
         break;
       case 101: /*<命令：N 101>*/
 
