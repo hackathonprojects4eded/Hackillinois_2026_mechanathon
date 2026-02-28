@@ -12,6 +12,8 @@ bool Robot::begin()
 {
     motor.DeviceDriverSet_Motor_Init();
     ultrasonic.DeviceDriverSet_ULTRASONIC_Init();
+    buzzer.DeviceDriverSet_passiveBuzzer_Init();
+
     bool ret = imu.begin();
     if (!ret)
     {
@@ -209,6 +211,8 @@ void Robot::stop()
     motor.DeviceDriverSet_Motor_control(direction_void, 0, direction_void, 0, true);
     _isMoving = false;
     _isTurning = false;
+    // silence buzzer when motion stops
+    noTone(PIN_passiveBuzzer);
 }
 
 float Robot::_normalizeAngle(float angle)

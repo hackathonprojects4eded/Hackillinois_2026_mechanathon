@@ -4,6 +4,7 @@
 #include "Ultrasonic_control.h"
 #include "motor_control.h"
 #include "SimpleKalmanFilter.h"
+#include "Buzzer_control.h"
 
 class Robot
 {
@@ -11,6 +12,7 @@ private:
     MPU6050Wrapper imu;
     DeviceDriverSet_ULTRASONIC ultrasonic;
     DeviceDriverSet_Motor motor;
+    DeviceDriverSet_passiveBuzzer buzzer;   // added buzzer for audio cues
     SimpleKalmanFilter ultrasonicFilter; // Kalman filter for ultrasonic distance
     uint16_t _lastFilteredDistance;      // Store last filtered distance value
 
