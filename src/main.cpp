@@ -1,86 +1,44 @@
 #include <Arduino.h>
 
-#include "MPU6050Wrapper.h"
-#include "Ultrasonic_control.h"
-
-// Ultrasonic driver instance
-DeviceDriverSet_ULTRASONIC ultrasonic;
+#include "Robot.h"
 
 // Global Robot instance
-MPU6050Wrapper imu;
-
-static unsigned long lastDistPrint = 0;
-const unsigned long DIST_PRINT_INTERVAL = 1000;
+Robot robot;
 
 void setup()
 {
   Serial.begin(115200);
   while (!Serial)
     ;
-  ultrasonic.DeviceDriverSet_ULTRASONIC_Init();
-  bool ret = imu.begin();
-  if (!ret)
+
+  if (!robot.begin())
   {
-    Serial.println("failed to init imu");
+    Serial.println("Failed to initialize robot");
     while (1)
       ;
   }
+  Serial.println("Robot initialized successfully");
 }
 
 void loop()
 {
-  // imu.update(); // reads raw + DMP FIFO if interrupt fired
-  //               // imu.printData(); // prints whatever OUTPUT_* flags are enabled
+  // Example usage:
+  // Move forward until reaching 20cm from wall
+  robot.moveToWall(20, 180); // distance=20cm, baseSpeed=180/255
 
-  // float pitch = imu.getFilteredPitch();
-  // float roll = imu.getFilteredRoll();
-  // float yaw = imu.getFilteredYaw();
+  // Turn to face left (-90 degrees)
+  robot.turnToAngle(-90, 5.0, true); // angle=-90, offset=5°, both wheels
 
-  // Serial.print("yaw:");
-  // Serial.print(yaw);
-  // Serial.print(",pitch:");
-  // Serial.print(pitch);
-  // Serial.print(",roll:");
-  // Serial.println(roll);
+  // Move to wall again
+  robot.moveToWall(25, 180);
 
-  if (millis() - lastDistPrint >= DIST_PRINT_INTERVAL)
-  {
-    lastDistPrint = millis();
-    uint16_t distCm = ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
-    Serial.print("Ultrasonic distance: ");
-    Serial.print(distCm);
-    Serial.println(" cm");
-  }
+  // Turn to face right (90 degrees) using only outer wheel
+  robot.turnToAngle(90, 5.0, false); // angle=90, offset=5°, single wheel
+
+  // Stop and wait
+  robot.stop();
+  delay(2000);
 }
-
-// #include "DeviceDriverSet_xxx0.h"
-// #include "ApplicationFunctionSet_xxx0.h"
-
-// ApplicationFunctionSet Application_FunctionSet;
-
-// void setup()
-// {
-//   Serial.begin(115200);
-
-//   // Initialize robot (motors and IR sensors)
-//   robot.init();
-
-//   // Simple movement
-//   robot.move(Robot::FORWARD, 200); // Move forward at speed 200
-
-//   robot.move(Robot::LEFT, 255); // Turn left at max speed
-//   robot.stop();
-// }
-
-// void loop()
-// {
-//   imu.update();    // reads raw + DMP FIFO if interrupt fired
-//   imu.printData(); // prints whatever OUTPUT_* flags are enabled
-
-//   // Or access data directly:
-//   // imu.raw().ax, imu.raw().gy, etc.
-//   // imu.orientation().yaw, .pitch, .roll, etc.
-// }
 
 // #include "DeviceDriverSet_xxx0.h"
 // #include "ApplicationFunctionSet_xxx0.h"
