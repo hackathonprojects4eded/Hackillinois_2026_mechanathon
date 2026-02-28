@@ -7,6 +7,21 @@
 Robot robot;
 DeviceDriverSet_RBGLED led;
 
+const uint8_t numColors = 6;
+const uint8_t colors[numColors][3] = {
+    {255, 0, 0},    // red
+    {0, 255, 0},    // green
+    {0, 0, 255},    // blue
+    {255, 165, 0},  // orange
+    {255, 255, 0},  // yellow
+    {255, 255, 255} // white
+};
+// cycle through some colors every 500ms
+static unsigned long lastChange = 0;
+static uint8_t idx = 0;
+
+unsigned long now = millis();
+
 void setup()
 {
   Serial.begin(115200);
@@ -14,34 +29,34 @@ void setup()
     ;
 
   // initialize LEDs for app control
-  led.DeviceDriverSet_RBGLED_Init(100);
+  led.DeviceDriverSet_RBGLED_Init(95);
 
   if (!robot.begin())
   {
     Serial.println("Failed to initialize robot");
+    led.DeviceDriverSet_RBGLED_Color(NUM_LEDS,
+                                     colors[0][0],
+                                     colors[0][1],
+                                     colors[0][2]);
     while (1)
       ;
   }
   Serial.println("Robot initialized successfully");
+
+  delay(5000);
+  led.DeviceDriverSet_RBGLED_Color(NUM_LEDS,
+                                   colors[2][0],
+                                   colors[2][1],
+                                   colors[2][2]);
+
+  robot.moveToWall(20, 180);
+  robot.stop();
 }
 
 // autonomous LED pattern (ignores serial input)
 void controlLED()
 {
-  // cycle through some colors every 500ms
-  static unsigned long lastChange = 0;
-  static uint8_t idx = 0;
-  const uint8_t numColors = 6;
-  const uint8_t colors[numColors][3] = {
-      {255, 0, 0},    // red
-      {0, 255, 0},    // green
-      {0, 0, 255},    // blue
-      {255, 165, 0},  // orange
-      {255, 255, 0},  // yellow
-      {255, 255, 255} // white
-  };
 
-  unsigned long now = millis();
   if (now - lastChange >= 500)
   {
     lastChange = now;
