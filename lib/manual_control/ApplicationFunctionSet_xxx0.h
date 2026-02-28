@@ -17,6 +17,8 @@ public:
   void ApplicationFunctionSet_Init(void);
   void ApplicationFunctionSet_Rocker(void);
   void ApplicationFunctionSet_SerialPortDataAnalysis(void);
+  void ApplicationFunctionSet_ObstacleAvoidance(void);
+  void SetFunctionalMode(int mode);  // Mode setter for external control
 
   void CMD_ClearAllFunctionsXXX(void);
 

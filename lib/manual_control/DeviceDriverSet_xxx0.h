@@ -9,7 +9,7 @@
 #ifndef _DeviceDriverSet_xxx0_H_
 #define _DeviceDriverSet_xxx0_H_
 
-#include <arduino.h>
+#include <Arduino.h>
 
 #define _Test_DeviceDriverSet 0
 

@@ -99,6 +99,10 @@ void setup()
 {
   // put your setup code here, to run once:
   Application_FunctionSet.ApplicationFunctionSet_Init();
+  
+  // Enable obstacle avoidance mode (ObstacleAvoidance_mode = enum value 2)
+  Application_FunctionSet.SetFunctionalMode(2);  // ObstacleAvoidance_mode
+  Serial.println("Obstacle avoidance mode enabled!");
 }
 
 void loop()
@@ -106,5 +110,6 @@ void loop()
   // put your main code here, to run repeatedly:
   Application_FunctionSet.ApplicationFunctionSet_SerialPortDataAnalysis();
   Application_FunctionSet.ApplicationFunctionSet_Rocker();
+  Application_FunctionSet.ApplicationFunctionSet_ObstacleAvoidance();  // Enable obstacle avoidance
   Application_FunctionSet.CMD_ClearAllFunctionsXXX();
 }
