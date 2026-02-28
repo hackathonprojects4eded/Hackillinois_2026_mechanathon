@@ -2,7 +2,9 @@
 
 Robot::Robot()
     : _isMoving(false), _targetDistance(0), _moveBaseSpeed(180),
-      _isTurning(false), _targetTurnAngle(0), _turnAngleOffset(5.0f), _turnBothWheels(true)
+      _isTurning(false), _targetTurnAngle(0), _turnAngleOffset(5.0f), _turnBothWheels(true),
+      _lastFilteredDistance(69),
+      ultrasonicFilter(2.0f, 5.0f, 2.0f) // mea_e=2cm, est_e=5cm, q=2cm (process noise)
 {
 }
 
@@ -21,6 +23,15 @@ bool Robot::begin()
 
 void Robot::update()
 {
+    uint16_t rawDist = ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
+    Serial.println("----");
+    Serial.println(rawDist);
+    if (!(rawDist > 5000 || rawDist == 150 || rawDist == 149 || rawDist == 0))
+    {
+        _lastFilteredDistance = (uint16_t)ultrasonicFilter.updateEstimate((float)rawDist);
+    }
+    Serial.println(_lastFilteredDistance);
+
     imu.update();
 }
 
@@ -36,11 +47,10 @@ void Robot::moveToWall(uint16_t distanceToWall, uint8_t baseSpeed)
     _targetDistance = distanceToWall;
     _moveBaseSpeed = baseSpeed;
     _isMoving = true;
-    // Main movement loop
     while (_isMoving)
     {
-        imu.update();
-        uint16_t currentDist = (ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm() + ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm() + ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm() + ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm() + ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm()) / 5.0f;
+        update();
+        uint16_t currentDist = _lastFilteredDistance;
 
         Serial.println(currentDist);
 

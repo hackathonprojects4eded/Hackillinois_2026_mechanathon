@@ -3,6 +3,7 @@
 #include "MPU6050Wrapper.h"
 #include "Ultrasonic_control.h"
 #include "motor_control.h"
+#include "SimpleKalmanFilter.h"
 
 class Robot
 {
@@ -10,6 +11,8 @@ private:
     MPU6050Wrapper imu;
     DeviceDriverSet_ULTRASONIC ultrasonic;
     DeviceDriverSet_Motor motor;
+    SimpleKalmanFilter ultrasonicFilter; // Kalman filter for ultrasonic distance
+    uint16_t _lastFilteredDistance;      // Store last filtered distance value
 
     // Movement state
     bool _isMoving;
@@ -53,5 +56,5 @@ public:
 
     // Accessors
     float getYaw() const { return imu.getFilteredYaw(); }
-    uint16_t getDistance() { return ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm(); }
+    uint16_t getDistance() const { return _lastFilteredDistance; }
 };

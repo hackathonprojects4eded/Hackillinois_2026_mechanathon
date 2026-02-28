@@ -156,7 +156,7 @@ void MPU6050Wrapper::_updateDMP()
     // Apply Kalman filter
     _filteredPitch = _kalmanPitch.getAngle(_orient.pitch, gyroRatePitch, dt);
     _filteredRoll = _kalmanRoll.getAngle(_orient.roll, gyroRateRoll, dt);
-    _filteredYaw = _orient.yaw;  // Yaw comes directly from DMP (gyro integration)
+    _filteredYaw = _orient.yaw; // Yaw comes directly from DMP (gyro integration)
 #endif
 
 #if defined(OUTPUT_READABLE_REALACCEL) || defined(OUTPUT_READABLE_WORLDACCEL)
