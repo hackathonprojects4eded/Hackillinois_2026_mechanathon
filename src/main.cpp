@@ -1,65 +1,65 @@
 #include <Arduino.h>
 
-#include "Robot.h"
+// #include "Robot.h"
 
-#include "MPU6050Wrapper.h"
-#include "Ultrasonic_control.h"
+// #include "MPU6050Wrapper.h"
+// #include "Ultrasonic_control.h"
 
-// Ultrasonic driver instance
-DeviceDriverSet_ULTRASONIC ultrasonic;
+// // Ultrasonic driver instance
+// DeviceDriverSet_ULTRASONIC ultrasonic;
 
-// Global Robot instance
-Robot robot;
-MPU6050Wrapper imu;
+// // Global Robot instance
+// Robot robot;
+// MPU6050Wrapper imu;
 
-void setup()
-{
-  Serial.begin(115200);
+// void setup()
+// {
+//   Serial.begin(115200);
 
-  // Initialize ultrasonic I2C driver
-  ultrasonic.DeviceDriverSet_ULTRASONIC_Init();
+//   // Initialize ultrasonic I2C driver
+//   ultrasonic.DeviceDriverSet_ULTRASONIC_Init();
 
-  // Initialize robot (motors and IR sensors)
-  robot.init();
+//   // Initialize robot (motors and IR sensors)
+//   robot.init();
 
-  // Simple movement
-  robot.move(Robot::FORWARD, 200); // Move forward at speed 200
-  robot.move(Robot::LEFT, 255);    // Turn left at max speed
-  robot.stop();
+//   // Simple movement
+//   robot.move(Robot::FORWARD, 200); // Move forward at speed 200
+//   robot.move(Robot::LEFT, 255);    // Turn left at max speed
+//   robot.stop();
 
-  // IR line tracking
-  uint16_t left, middle, right;
-  robot.getIRSensorValues(left, middle, right);
+//   // IR line tracking
+//   uint16_t left, middle, right;
+//   robot.getIRSensorValues(left, middle, right);
 
-  if (robot.isOnLine(middle))
-  {
-    robot.move(Robot::FORWARD, 200); // Follow line
-  }
-}
+//   if (robot.isOnLine(middle))
+//   {
+//     robot.move(Robot::FORWARD, 200); // Follow line
+//   }
+// }
 
-void loop()
-{
-  imu.update();    // reads raw + DMP FIFO if interrupt fired
-  imu.printData(); // prints whatever OUTPUT_* flags are enabled
+// void loop()
+// {
+//   imu.update();    // reads raw + DMP FIFO if interrupt fired
+//   imu.printData(); // prints whatever OUTPUT_* flags are enabled
 
-  // Or access data directly:
-  // imu.raw().ax, imu.raw().gy, etc.
-  // imu.orientation().yaw, .pitch, .roll, etc.
+//   // Or access data directly:
+//   // imu.raw().ax, imu.raw().gy, etc.
+//   // imu.orientation().yaw, .pitch, .roll, etc.
 
-  // Periodically print distance in cm and mm (every 1s)
-  static unsigned long lastDistPrint = 0;
-  const unsigned long DIST_PRINT_INTERVAL = 1000;
-  if (millis() - lastDistPrint >= DIST_PRINT_INTERVAL) {
-    lastDistPrint = millis();
-    float distCm = ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
-    float distMm = ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceMm();
-    Serial.print("Ultrasonic distance: ");
-    Serial.print(distCm, 2);
-    Serial.print(" cm  /  ");
-    Serial.print(distMm, 1);
-    Serial.println(" mm");
-  }
-}
+//   // Periodically print distance in cm and mm (every 1s)
+//   static unsigned long lastDistPrint = 0;
+//   const unsigned long DIST_PRINT_INTERVAL = 1000;
+//   if (millis() - lastDistPrint >= DIST_PRINT_INTERVAL) {
+//     lastDistPrint = millis();
+//     float distCm = ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
+//     float distMm = ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceMm();
+//     Serial.print("Ultrasonic distance: ");
+//     Serial.print(distCm, 2);
+//     Serial.print(" cm  /  ");
+//     Serial.print(distMm, 1);
+//     Serial.println(" mm");
+//   }
+// }
 
 // #include "DeviceDriverSet_xxx0.h"
 // #include "ApplicationFunctionSet_xxx0.h"
