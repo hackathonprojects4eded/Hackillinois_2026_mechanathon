@@ -1,6 +1,6 @@
 /*
  * @Description: In User Settings Edit
- * @Author: HOU Changhua 
+ * @Author: HOU Changhua
  * @Date: 2019-07-11 13:40:52
  * @LastEditTime: 2019-10-15 16:22:48
  * @LastEditors: Please set LastEditors
@@ -31,27 +31,6 @@ void DeviceDriverSet_RBGLED::DeviceDriverSet_RBGLED_Init(uint8_t set_Brightness)
   FastLED.addLeds<NEOPIXEL, PIN_RBGLED>(leds, NUM_LEDS);
   FastLED.setBrightness(set_Brightness);
 }
-#if _Test_DeviceDriverSet
-void DeviceDriverSet_RBGLED::DeviceDriverSet_RBGLED_Test(void)
-{
-  leds[0] = CRGB::White;
-  FastLED.show();
-  delay(50);
-  leds[1] = CRGB::Red;
-  FastLED.show();
-  delay(50);
-  leds[2] = CRGB::Green;
-  FastLED.show();
-  delay(50);
-  leds[3] = CRGB::Yellow;
-  FastLED.show();
-  delay(50);
-  leds[4] = CRGB::Orange;
-  FastLED.show();
-  delay(50);
-  DeviceDriverSet_RBGLED_xxx(50 /*Duration*/, 5 /*Traversal_Number*/, CRGB::Black);
-}
-#endif
 
 void DeviceDriverSet_RBGLED::DeviceDriverSet_RBGLED_Color(uint8_t LED_s, uint8_t r, uint8_t g, uint8_t b)
 {

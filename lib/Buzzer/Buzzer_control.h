@@ -10,17 +10,13 @@
 #define BUZZER_CONTROL_H
 #include <Arduino.h>
 
-#define _Test_DeviceDriverSet 1
-
 /*passive Buzzer*/
 #include "pitches.h"
 class DeviceDriverSet_passiveBuzzer
 {
 public:
   void DeviceDriverSet_passiveBuzzer_Init(void);
-#if _Test_DeviceDriverSet
-  void DeviceDriverSet_passiveBuzzer_Test(void);
-#endif
+
   void DeviceDriverSet_passiveBuzzer_control(void);
 
 public:

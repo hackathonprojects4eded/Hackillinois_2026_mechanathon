@@ -1,6 +1,6 @@
 /*
  * @Description: In User Settings Edit
- * @Author: HOU Changhua 
+ * @Author: HOU Changhua
  * @Date: 2019-07-11 13:40:52
  * @LastEditTime: 2019-10-15 10:27:06
  * @LastEditors: Please set LastEditors
@@ -20,36 +20,26 @@ extern void _delay(unsigned long ms)
 /*Motor control*/
 void DeviceDriverSet_Motor::DeviceDriverSet_Motor_Init(void)
 {
-   pinMode(PIN_Motor_PWMA, OUTPUT);
+  pinMode(PIN_Motor_PWMA, OUTPUT);
   pinMode(PIN_Motor_PWMB, OUTPUT);
   pinMode(PIN_Motor_AIN, OUTPUT);
   pinMode(PIN_Motor_BIN, OUTPUT);
   pinMode(PIN_Motor_STBY, OUTPUT);
 }
 
-#if _Test_DeviceDriverSet
-void DeviceDriverSet_Motor::DeviceDriverSet_Motor_Test(void)
-{
-  digitalWrite(PIN_Motor_AIN, LOW);
-  digitalWrite(PIN_Motor_BIN, HIGH);
-  analogWrite(PIN_Motor_PWMA, 150);
-  analogWrite(PIN_Motor_PWMB, 150);
-}
-#endif
-
 /*
  Motor_control：AB / 方向、速度
 */
-void DeviceDriverSet_Motor::DeviceDriverSet_Motor_control(boolean direction_A, uint8_t speed_A, //A组电机参数
-                                                          boolean direction_B, uint8_t speed_B, //B组电机参数
-                                                          boolean controlED                     //AB使能允许 true
-                                                          )                                     //电机控制
+void DeviceDriverSet_Motor::DeviceDriverSet_Motor_control(boolean direction_A, uint8_t speed_A, // A组电机参数
+                                                          boolean direction_B, uint8_t speed_B, // B组电机参数
+                                                          boolean controlED                     // AB使能允许 true
+                                                          )                                     // 电机控制
 {
-   if (controlED == control_enable) //使能允许？
+  if (controlED == control_enable) // 使能允许？
   {
-    digitalWrite(PIN_Motor_STBY, HIGH); //开启
-    {                                   //A...
-      switch (direction_A)              //方向控制
+    digitalWrite(PIN_Motor_STBY, HIGH); // 开启
+    {                                   // A...
+      switch (direction_A)              // 方向控制
       {
       case direction_just:
         digitalWrite(PIN_Motor_AIN, HIGH);
@@ -67,7 +57,7 @@ void DeviceDriverSet_Motor::DeviceDriverSet_Motor_control(boolean direction_A, u
         break;
       }
     }
-    { //B...
+    { // B...
       switch (direction_B)
       {
       case direction_just:
@@ -90,7 +80,7 @@ void DeviceDriverSet_Motor::DeviceDriverSet_Motor_control(boolean direction_A, u
   }
   else
   {
-    digitalWrite(PIN_Motor_STBY, LOW); //关闭
+    digitalWrite(PIN_Motor_STBY, LOW); // 关闭
     analogWrite(PIN_Motor_PWMA, 0);
     analogWrite(PIN_Motor_PWMB, 0);
     return;

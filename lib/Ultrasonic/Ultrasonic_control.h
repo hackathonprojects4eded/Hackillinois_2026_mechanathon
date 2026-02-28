@@ -3,8 +3,6 @@
 
 #include <Arduino.h>
 
-#define _Test_DeviceDriverSet 1
-
 #define TimeCompensation 4
 extern unsigned long _millis();
 extern void _delay(unsigned long ms);
@@ -14,9 +12,7 @@ class DeviceDriverSet_ULTRASONIC
 {
 public:
   void DeviceDriverSet_ULTRASONIC_Init(void);
-#if _Test_DeviceDriverSet
-  void DeviceDriverSet_ULTRASONIC_Test(void);
-#endif
+
   void DeviceDriverSet_ULTRASONIC_Get(uint16_t *ULTRASONIC_Get /*out*/);
   // Convenience wrapper: read sensor and return distance to object in centimeters.
   // Assumes the raw value returned by DeviceDriverSet_ULTRASONIC_Get is

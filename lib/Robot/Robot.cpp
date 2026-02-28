@@ -35,8 +35,12 @@ bool Robot::begin()
 void Robot::update()
 {
     Application_FunctionSet.ApplicationFunctionSet_SerialPortDataAnalysis();
+
     if (!_manualMode)
     {
+        led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Red);
+        delay(1000);
+        led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
         uint16_t rawDist = ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
         delay(20);
         rawDist += ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
@@ -59,6 +63,9 @@ void Robot::update()
     }
     else
     {
+        led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Blue);
+        delay(1000);
+        led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
         Application_FunctionSet.ApplicationFunctionSet_Rocker();
         Application_FunctionSet.CMD_ClearAllFunctionsXXX();
     }

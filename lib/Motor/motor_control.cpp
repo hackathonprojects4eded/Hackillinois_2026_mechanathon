@@ -27,17 +27,6 @@ void DeviceDriverSet_Motor::DeviceDriverSet_Motor_Init(void)
     pinMode(PIN_Motor_STBY, OUTPUT);
 }
 
-#if _Test_DeviceDriverSet
-void DeviceDriverSet_Motor::DeviceDriverSet_Motor_Test(void)
-{
-
-    digitalWrite(PIN_Motor_AIN, LOW);
-    digitalWrite(PIN_Motor_BIN, HIGH);
-    analogWrite(PIN_Motor_PWMA, 150);
-    analogWrite(PIN_Motor_PWMB, 150);
-}
-#endif
-
 /*
  Motor_control：AB / 方向、速度
 */

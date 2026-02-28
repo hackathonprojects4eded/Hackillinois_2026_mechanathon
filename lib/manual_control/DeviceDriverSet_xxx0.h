@@ -11,9 +11,7 @@
 
 #include <Arduino.h>
 
-#define _Test_DeviceDriverSet 0
-
-#define TimeCompensation 4 
+#define TimeCompensation 4
 extern unsigned long _millis();
 extern void _delay(unsigned long ms);
 
@@ -22,15 +20,12 @@ class DeviceDriverSet_Motor
 {
 public:
   void DeviceDriverSet_Motor_Init(void);
-#if _Test_DeviceDriverSet
-  void DeviceDriverSet_Motor_Test(void);
-#endif
-  void DeviceDriverSet_Motor_control(boolean direction_A, uint8_t speed_A, //A组电机参数
-                                     boolean direction_B, uint8_t speed_B, //B组电机参数
-                                     boolean controlED                     //AB使能允许 true
-  );                                                                       //电机控制
-private:
 
+  void DeviceDriverSet_Motor_control(boolean direction_A, uint8_t speed_A, // A组电机参数
+                                     boolean direction_B, uint8_t speed_B, // B组电机参数
+                                     boolean controlED                     // AB使能允许 true
+  );                                                                       // 电机控制
+private:
 #define PIN_Motor_STBY 4
 #define PIN_Motor_PWMA 9
 #define PIN_Motor_PWMB 6

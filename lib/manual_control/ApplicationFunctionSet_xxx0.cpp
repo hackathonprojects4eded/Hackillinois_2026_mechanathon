@@ -16,7 +16,6 @@
 #include <SoftwareSerial.h>
 
 #define _is_print 1
-#define _Test_print 0 // When testing, remember to set 0 after using the test to save controller resources and load.
 
 /*硬件设备成员对象序列*/
 DeviceDriverSet_Motor AppMotor;
@@ -227,9 +226,7 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
   }
   if ((SerialPortData.length() > 0) && (SerialPortData != "") && (true == SerialPortData.endsWith("}")))
   {
-#if _Test_print
-    Serial.println(SerialPortData);
-#endif
+
     // 2#导入JsonDocument
     StaticJsonDocument<200> doc;                                       // 声明一个JsonDocument对象
     DeserializationError error = deserializeJson(doc, SerialPortData); // 反序列化JSON数据
@@ -257,9 +254,11 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
         break;
       case 7: /*<命令：N 7>*/
         MANUAL_MODE = true;
+        Serial.println("Recived manual mode request");
         break;
       case 8: /*<命令：N 8>*/
         MANUAL_MODE = true;
+        Serial.println("Recived manual mode request");
         break;
       case 9: /*<命令：N 9>*/
         break;
@@ -277,7 +276,6 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
         break;
       case 100:                                                                      /*<命令：N 100>*/
         Application_OwlBotxxx0.Functional_Mode = CMD_ClearAllFunctions_Standby_mode; /*清除功能：进入空闲模式*/
-
         break;
       case 101: /*<命令：N 101>*/
 
