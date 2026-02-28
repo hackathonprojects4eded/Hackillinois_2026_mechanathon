@@ -43,12 +43,3 @@ void DeviceDriverSet_ULTRASONIC::DeviceDriverSet_ULTRASONIC_Test(void)
   Serial.println((dat[0] << 8) | dat[1]);
 }
 #endif
-
-extern unsigned long _millis()
-{
-  return millis() * TimeCompensation;
-}
-extern void _delay(unsigned long ms)
-{
-  delay(ms / TimeCompensation);
-}

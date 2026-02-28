@@ -6,7 +6,7 @@
  * @LastEditTime: 2019-10-15 10:32:19
  * @LastEditors: Please set LastEditors
  */
-#include <hardwareSerial.h>
+#include <HardwareSerial.h>
 #include <stdio.h>
 #include <string.h>
 #include "ApplicationFunctionSet_xxx0.h"
