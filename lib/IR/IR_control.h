@@ -3,7 +3,7 @@
 #ifndef IR_CONTROL_H
 #define IR_CONTROL_H
 
-#define _Test_DeviceDriverSet 0
+#define _Test_DeviceDriverSet 1
 #include <Arduino.h>
 #define TimeCompensation 4
 extern unsigned long _millis();
