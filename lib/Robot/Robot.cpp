@@ -26,7 +26,7 @@ bool Robot::begin()
     bool ret = imu.begin();
     if (!ret)
     {
-        Serial.println("failed to init imu");
+        // Serial.println("failed to init imu");
         return false;
     }
     return true;
@@ -78,7 +78,7 @@ void Robot::moveToWall(uint16_t distanceToWall, uint8_t baseSpeed)
     // Validate parameters
     if (distanceToWall >= 40)
     {
-        Serial.println("Error: distanceToWall must be < 40 cm");
+        // Serial.println("Error: distanceToWall must be < 40 cm");
         return;
     }
 
@@ -90,16 +90,16 @@ void Robot::moveToWall(uint16_t distanceToWall, uint8_t baseSpeed)
         update();
         uint16_t currentDist = _lastFilteredDistance;
 
-        Serial.println(currentDist);
+        // Serial.println(currentDist);
 
         // Check if we've reached the target distance
         if (currentDist <= _targetDistance && currentDist != 0)
         {
             stop();
             _isMoving = false;
-            Serial.print("Reached wall at distance: ");
-            Serial.print(currentDist);
-            Serial.println(" cm");
+            //  Serial.print("Reached wall at distance: ");
+            //  Serial.print(currentDist);
+            //  Serial.println(" cm");
             return;
         }
 
@@ -110,9 +110,9 @@ void Robot::moveToWall(uint16_t distanceToWall, uint8_t baseSpeed)
 
         _applyHeadingCorrection(speedA, speedB, currentYaw - robotTargetYaw);
 
-        Serial.println("Speeds");
-        Serial.println(speedA);
-        Serial.println(speedB);
+        // Serial.println("Speeds");
+        // Serial.println(speedA);
+        // Serial.println(speedB);
 
         // Determine forward direction (true = forward, false = backward)
         bool forwardDir = _reverseDirection(true);
@@ -157,8 +157,8 @@ void Robot::turnToAngle(float targetAngle, float angleOffset, bool bothWheels)
         {
             stop();
             _isTurning = false;
-            Serial.print("Reached target angle: ");
-            Serial.println(currentYaw);
+            // Serial.print("Reached target angle: ");
+            //  Serial.println(currentYaw);
             return;
         }
 

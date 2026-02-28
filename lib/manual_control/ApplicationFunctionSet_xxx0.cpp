@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "ApplicationFunctionSet_xxx0.h"
-#include "DeviceDriverSet_xxx0.h"
+#include "motor_control.h"
 
 #include "ArduinoJson-v6.11.1.h" //ArduinoJson
 #include <SoftwareSerial.h>
@@ -25,15 +25,6 @@ SoftwareSerial BTSerial(10, 11);
 
 #define OBSTACLE_DISTANCE_CM 20 // Obstacle detected if closer than 20cm
 extern bool MANUAL_MODE;
-
-/*f(x) int */
-static boolean function_xxx(long x, long s, long e) // f(x)
-{
-  if (s <= x && x <= e)
-    return true;
-  else
-    return false;
-}
 
 /*Motion direction control sequence*/
 enum OwlBotMotionControl
@@ -83,16 +74,9 @@ Application_xxx Application_OwlBotxxx0;
 
 void ApplicationFunctionSet::ApplicationFunctionSet_Init(void)
 {
-  // AppMotor.DeviceDriverSet_Motor_Init();
 
-  // Initialize Bluetooth
   BTSerial.begin(9600);
   delay(50);
-
-  // Initialize Ultrasonic sensor
-  // AppUltrasonic.DeviceDriverSet_ULTRASONIC_Init();
-
-  Serial.println("System initialized: Motor, Bluetooth, Ultrasonic ready.");
 }
 
 /*
@@ -233,6 +217,7 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
     if (!error)                                                        // 检查反序列化是否成功
     {
       int control_mode_N = doc["N"];
+      Serial.println(control_mode_N);
       char buf[3];
       uint8_t temp = doc["H"];
       sprintf(buf, "%d", temp);

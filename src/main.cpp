@@ -44,9 +44,9 @@ void loop()
 {
   robot.update();
 
-  Serial.println("----");
-  Serial.println(robot.getRow());
-  Serial.println(robot.getPitch());
+  // Serial.println("----");
+  // Serial.println(robot.getRow()); //thjis one matters (and up is negative cuz its flipped rip)
+  // Serial.println(robot.getPitch());
 }
 
 // #include "DeviceDriverSet_xxx0.h"
