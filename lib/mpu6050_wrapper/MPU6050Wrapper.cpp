@@ -16,10 +16,6 @@ MPU6050Wrapper::MPU6050Wrapper()
 {
     memset(&_orient, 0, sizeof(_orient));
     memset(&_raw, 0, sizeof(_raw));
-
-    // Teapot packet template
-    uint8_t tpl[14] = {'$', 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0x00, 0x00, '\r', '\n'};
-    memcpy(_teapotPacket, tpl, 14);
 }
 
 // ── begin() ───────────────────────────────────────────────────────────────────
@@ -84,8 +80,6 @@ bool MPU6050Wrapper::begin(bool calibrate)
 
     // Initialize Kalman filters with initial orientation
     _lastUpdateTime = micros();
-    _kalmanPitch.setAngle(_orient.pitch);
-    _kalmanRoll.setAngle(_orient.roll);
     _filteredPitch = _orient.pitch;
     _filteredRoll = _orient.roll;
     _filteredYaw = _orient.yaw;
@@ -145,17 +139,8 @@ void MPU6050Wrapper::_updateDMP()
     _orient.roll = ypr[2] * 180.0f / M_PI;
 
     // Apply Kalman filter to pitch and roll
-    uint32_t now = micros();
-    float dt = (float)(now - _lastUpdateTime) / 1000000.0f;
-    _lastUpdateTime = now;
-
-    // Convert gyro rates from raw to deg/s (sensitivity = 131 LSB/deg/s for ±250°/s)
-    float gyroRatePitch = _raw.gy / 131.0f;
-    float gyroRateRoll = _raw.gx / 131.0f;
-
-    // Apply Kalman filter
-    _filteredPitch = _kalmanPitch.getAngle(_orient.pitch, gyroRatePitch, dt);
-    _filteredRoll = _kalmanRoll.getAngle(_orient.roll, gyroRateRoll, dt);
+    _filteredPitch = _kalmanPitch.updateEstimate(_orient.pitch);
+    _filteredRoll = _kalmanRoll.updateEstimate(_orient.roll);
     _filteredYaw = _orient.yaw; // Yaw comes directly from DMP (gyro integration)
 #endif
 
@@ -166,18 +151,6 @@ void MPU6050Wrapper::_updateDMP()
 
 #ifdef OUTPUT_READABLE_WORLDACCEL
     _mpu.dmpGetLinearAccelInWorld(&_orient.aaWorld, &_orient.aaReal, &_q);
-#endif
-
-#ifdef OUTPUT_TEAPOT
-    _teapotPacket[2] = _fifoBuffer[0];
-    _teapotPacket[3] = _fifoBuffer[1];
-    _teapotPacket[4] = _fifoBuffer[4];
-    _teapotPacket[5] = _fifoBuffer[5];
-    _teapotPacket[6] = _fifoBuffer[8];
-    _teapotPacket[7] = _fifoBuffer[9];
-    _teapotPacket[8] = _fifoBuffer[12];
-    _teapotPacket[9] = _fifoBuffer[13];
-    _teapotPacket[11]++;
 #endif
 }
 
@@ -252,10 +225,6 @@ void MPU6050Wrapper::_printDMPData()
     Serial.print(_orient.aaWorld.y);
     Serial.print(F("\t"));
     Serial.println(_orient.aaWorld.z);
-#endif
-
-#ifdef OUTPUT_TEAPOT
-    Serial.write(_teapotPacket, 14);
 #endif
 }
 

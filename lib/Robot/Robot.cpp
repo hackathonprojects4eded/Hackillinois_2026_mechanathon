@@ -22,7 +22,7 @@ bool Robot::begin()
     motor.DeviceDriverSet_Motor_Init();
     ultrasonic.DeviceDriverSet_ULTRASONIC_Init();
     // buzzer.DeviceDriverSet_passiveBuzzer_Init();
-    // led.DeviceDriverSet_RBGLED_Init(95);
+    led.DeviceDriverSet_RBGLED_Init(95);
     bool ret = imu.begin();
     if (!ret)
     {

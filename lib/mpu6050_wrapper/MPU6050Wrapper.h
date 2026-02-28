@@ -2,7 +2,7 @@
 
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
-#include "Kalman.h"
+#include "SimpleKalmanFilter.h"
 
 #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
 #include "Wire.h"
@@ -103,7 +103,8 @@ private:
     RawData _raw;
 
     // Kalman filters for pitch and roll
-    Kalman _kalmanPitch, _kalmanRoll;
+    SimpleKalmanFilter _kalmanPitch{1.0f, 1.0f, 0.01f};
+    SimpleKalmanFilter _kalmanRoll{1.0f, 1.0f, 0.01f};
     float _filteredYaw, _filteredPitch, _filteredRoll;
     uint32_t _lastUpdateTime;
 

@@ -29,15 +29,15 @@ void setup()
   // delay(1000);
   // robot.led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
 
-  robot.moveToWall(20, 180);
-  robot.turnToAngle(-90, 5.0, true);
-  robot.update();
+  // robot.moveToWall(20, 180);
+  // robot.turnToAngle(-90, 5.0, true);
+  // robot.update();
 
-  delay(3000);
+  // delay(3000);
 
-  robot.moveToWall(20, 180);
-  robot.turnToAngle(-180, 5.0, true);
-  robot.stop();
+  // robot.moveToWall(20, 180);
+  // robot.turnToAngle(-180, 5.0, true);
+  // robot.stop();
 }
 
 void loop()
