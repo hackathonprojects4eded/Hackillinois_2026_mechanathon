@@ -3,6 +3,10 @@
 #include "Robot.h"
 
 #include "MPU6050Wrapper.h"
+#include "Ultrasonic_control.h"
+
+// Ultrasonic driver instance
+DeviceDriverSet_ULTRASONIC ultrasonic;
 
 // Global Robot instance
 Robot robot;
@@ -11,6 +15,9 @@ MPU6050Wrapper imu;
 void setup()
 {
   Serial.begin(115200);
+
+  // Initialize ultrasonic I2C driver
+  ultrasonic.DeviceDriverSet_ULTRASONIC_Init();
 
   // Initialize robot (motors and IR sensors)
   robot.init();
@@ -38,6 +45,20 @@ void loop()
   // Or access data directly:
   // imu.raw().ax, imu.raw().gy, etc.
   // imu.orientation().yaw, .pitch, .roll, etc.
+
+  // Periodically print distance in cm and mm (every 1s)
+  static unsigned long lastDistPrint = 0;
+  const unsigned long DIST_PRINT_INTERVAL = 1000;
+  if (millis() - lastDistPrint >= DIST_PRINT_INTERVAL) {
+    lastDistPrint = millis();
+    float distCm = ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
+    float distMm = ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceMm();
+    Serial.print("Ultrasonic distance: ");
+    Serial.print(distCm, 2);
+    Serial.print(" cm  /  ");
+    Serial.print(distMm, 1);
+    Serial.println(" mm");
+  }
 }
 
 // #include "DeviceDriverSet_xxx0.h"
