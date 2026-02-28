@@ -3,15 +3,21 @@
 Robot::Robot()
     : _isMoving(false), _targetDistance(0), _moveBaseSpeed(180),
       _isTurning(false), _targetTurnAngle(0), _turnAngleOffset(5.0f), _turnBothWheels(true),
-      _lastFilteredDistance(69),
+      _lastFilteredDistance(69), _headReversed(true),
       ultrasonicFilter(2.0f, 5.0f, 2.0f) // mea_e=2cm, est_e=5cm, q=2cm (process noise)
 {
 }
 
 bool Robot::begin()
 {
+    servo.attach(3);
+    servo.write(90);
+    servo.refresh();
+
     motor.DeviceDriverSet_Motor_Init();
     ultrasonic.DeviceDriverSet_ULTRASONIC_Init();
+    buzzer.DeviceDriverSet_passiveBuzzer_Init();
+    led.DeviceDriverSet_RBGLED_Init(95);
     bool ret = imu.begin();
     if (!ret)
     {
@@ -29,7 +35,7 @@ void Robot::update()
     rawDist /= 2;
     // Serial.println("----");
     // Serial.println(rawDist);
-    if (!(rawDist > 5000 || rawDist == 150 || rawDist == 149 || rawDist == 0))
+    if (!(rawDist > 5000 || rawDist == 150 || rawDist == 149))
     {
         _lastFilteredDistance = (uint16_t)ultrasonicFilter.updateEstimate((float)rawDist);
     }
@@ -40,6 +46,7 @@ void Robot::update()
     // Serial.println(_lastFilteredDistance);
 
     imu.update();
+    servo.refresh();
     delay(20);
 }
 
@@ -83,11 +90,15 @@ void Robot::moveToWall(uint16_t distanceToWall, uint8_t baseSpeed)
         Serial.println("Speeds");
         Serial.println(speedA);
         Serial.println(speedB);
+
+        // Determine forward direction (true = forward, false = backward)
+        bool forwardDir = _reverseDirection(true);
+
         // Move forward with heading correction
         motor.DeviceDriverSet_Motor_control(
-            true, speedA, // Motor A: forward with corrected speed
-            true, speedB, // Motor B: forward with corrected speed
-            true);        // Control enabled
+            forwardDir, speedA, // Motor A: forward with corrected speed
+            forwardDir, speedB, // Motor B: forward with corrected speed
+            true);              // Control enabled
 
         // delay(20); // Small delay for sensor polling
     }
@@ -95,26 +106,27 @@ void Robot::moveToWall(uint16_t distanceToWall, uint8_t baseSpeed)
 
 void Robot::turnToAngle(float targetAngle, float angleOffset, bool bothWheels)
 {
-    _targetTurnAngle = targetAngle;
+    float adjustedTargetAngle = _reverseAngle(targetAngle);
+
+    _targetTurnAngle = adjustedTargetAngle;
     _turnAngleOffset = angleOffset;
     _turnBothWheels = bothWheels;
     _isTurning = true;
 
-    // Normalize target angle to [-180, 180]
     _targetTurnAngle = _normalizeAngle(_targetTurnAngle);
 
-    const float PROPORTIONAL_GAIN = 2.0f; // Controls how aggressive the turn is
-    const uint8_t MAX_SPEED = 255;
-    const uint8_t MIN_SPEED = 150;
+    uint8_t SPEED = 200;
 
     while (_isTurning)
     {
         imu.update();
         float currentYaw = imu.getFilteredYaw();
-        Serial.println(currentYaw);
-        Serial.println(_targetTurnAngle);
 
-        // Check if we're at target angle
+        if (_headReversed)
+        {
+            currentYaw = _normalizeAngle(currentYaw + 180.0f);
+        }
+
         if (_isAtTargetAngle(currentYaw, _targetTurnAngle, _turnAngleOffset))
         {
             stop();
@@ -124,54 +136,27 @@ void Robot::turnToAngle(float targetAngle, float angleOffset, bool bothWheels)
             return;
         }
 
-        // Calculate angle error
         float angleDiff = _targetTurnAngle - currentYaw;
-
-        // Normalize the difference to [-180, 180]
-        if (angleDiff > 180)
-            angleDiff -= 360;
-        else if (angleDiff < -180)
-            angleDiff += 360;
-
-        // Proportional control: error to speed conversion
-        float err = angleDiff * PROPORTIONAL_GAIN;
-
-        // Clamp to speed limits
-        if (fabs(err) > MAX_SPEED)
-        {
-            err = (err / fabs(err)) * MAX_SPEED;
-        }
-        if (fabs(err) < MIN_SPEED && fabs(err) > 0.1f)
-        {
-            err = (err / fabs(err)) * MIN_SPEED;
-        }
-
-        // Convert error to motor speeds
-        // Positive err = turn right: left motor forward, right motor backward
-        // Negative err = turn left: left motor backward, right motor forward
-        int8_t speedA = (int8_t)(-err); // Left motor
-        int8_t speedB = (int8_t)(err);  // Right motor
+        angleDiff = _normalizeAngle(angleDiff);
 
         if (_turnBothWheels)
         {
-            // Both wheels rotate in opposite directions
-            motor.DeviceDriverSet_Motor_control(
-                speedA >= 0, abs(speedA), // Motor A
-                speedB >= 0, abs(speedB), // Motor B
-                true);                    // Control enabled
+            bool dirA = (angleDiff < 0);
+            uint8_t pwmA = SPEED;
+            bool dirB = (angleDiff > 0);
+            uint8_t pwmB = SPEED;
+
+            motor.DeviceDriverSet_Motor_control(dirA, pwmA, dirB, pwmB, true);
         }
         else
         {
-            // Single wheel (outer wheel) rotation
-            if (err > 0)
+            if (angleDiff > 0)
             {
-                // Turn right: only left wheel moves forward
-                motor.DeviceDriverSet_Motor_control(true, abs(speedA), true, 0, true);
+                motor.DeviceDriverSet_Motor_control(direction_just, SPEED, direction_just, 0, true);
             }
             else
             {
-                // Turn left: only right wheel moves forward
-                motor.DeviceDriverSet_Motor_control(true, 0, true, abs(speedB), true);
+                motor.DeviceDriverSet_Motor_control(direction_just, 0, direction_just, SPEED, true);
             }
         }
 
@@ -226,17 +211,44 @@ void Robot::_applyHeadingCorrection(uint8_t &speedA, uint8_t &speedB, float yaw)
     {
         uint8_t correction = min((uint8_t)(fabs(yaw) * CORRECTION_RATE), MAX_CORRECTION);
 
-        if (yaw < 0)
+        if (yaw > 0)
         {
             // Tilted left, speed up right motor (B)
             speedA = max((uint8_t)(speedA - correction), MIN_SPEED);
             speedB = min((uint8_t)(speedB + correction), 255);
+            led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Blue);
+            delay(1000);
+            led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
         }
         else
         {
             // Tilted right, speed up left motor (A)
             speedA = min((uint8_t)(speedA + correction), 255);
             speedB = max((uint8_t)(speedB - correction), MIN_SPEED);
+            led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Amethyst);
+            delay(1000);
+            led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
         }
     }
+}
+
+bool Robot::_reverseDirection(bool direction)
+{
+    // If head is reversed, flip the direction
+    // true = forward, false = backward
+    if (_headReversed)
+    {
+        return !direction;
+    }
+    return direction;
+}
+
+float Robot::_reverseAngle(float angle)
+{
+    // If head is reversed, invert the angle (add 180 degrees)
+    if (_headReversed)
+    {
+        return angle + 180.0f;
+    }
+    return angle;
 }

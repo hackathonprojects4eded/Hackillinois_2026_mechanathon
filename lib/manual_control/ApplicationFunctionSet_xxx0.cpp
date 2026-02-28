@@ -1,7 +1,7 @@
 
 /*
  * @Description: Application Function Set
- * @Author: HOU Changhua 
+ * @Author: HOU Changhua
  * @Date: 2019-07-12 18:30:51
  * @LastEditTime: 2019-10-15 10:32:19
  * @LastEditors: Please set LastEditors
@@ -17,7 +17,7 @@
 #include "Ultrasonic_control.h"
 
 #define _is_print 1
-#define _Test_print 0 //When testing, remember to set 0 after using the test to save controller resources and load.
+#define _Test_print 0 // When testing, remember to set 0 after using the test to save controller resources and load.
 
 /*硬件设备成员对象序列*/
 DeviceDriverSet_Motor AppMotor;
@@ -30,7 +30,7 @@ SoftwareSerial BTSerial(10, 11);
 bool autonomous_mode = true;
 
 /*f(x) int */
-static boolean function_xxx(long x, long s, long e) //f(x)
+static boolean function_xxx(long x, long s, long e) // f(x)
 {
   if (s <= x && x <= e)
     return true;
@@ -50,7 +50,7 @@ enum OwlBotMotionControl
   RightForward,  //(7)
   RightBackward, //(8)
   stop_it        //(9)
-};            //direction:前行（1）、后退（2）、 左前（3）、右前（4）、后左（5）、后右（6）
+}; // direction:前行（1）、后退（2）、 左前（3）、右前（4）、后左（5）、后右（6）
 
 /*Mode control sequence*/
 enum OwlBotFunctionalModel
@@ -88,14 +88,14 @@ void ApplicationFunctionSet::ApplicationFunctionSet_Init(void)
 {
   Serial.begin(9600);
   AppMotor.DeviceDriverSet_Motor_Init();
-  
+
   // Initialize Bluetooth
   BTSerial.begin(9600);
   delay(50);
-  
+
   // Initialize Ultrasonic sensor
   AppUltrasonic.DeviceDriverSet_ULTRASONIC_Init();
-  
+
   Serial.println("System initialized: Motor, Bluetooth, Ultrasonic ready.");
 }
 
@@ -115,51 +115,51 @@ static void ApplicationFunctionSet_OwlBotMotionControl(OwlBotMotionControl direc
   ApplicationFunctionSet Application_FunctionSet;
   switch (direction)
   {
-    case /* constant-expression */ Left:
+  case /* constant-expression */ Left:
     /* code */
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_just, /*speed_A*/ speed,
-                                           /*direction_B*/ direction_back, /*speed_B*/ speed, /*controlED*/ control_enable); //Motor control
+                                           /*direction_B*/ direction_back, /*speed_B*/ speed, /*controlED*/ control_enable); // Motor control
     break;
   case /* constant-expression */ Right:
     /* code */
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_back, /*speed_A*/ speed,
-                                           /*direction_B*/ direction_just, /*speed_B*/ speed, /*controlED*/ control_enable); //Motor control
+                                           /*direction_B*/ direction_just, /*speed_B*/ speed, /*controlED*/ control_enable); // Motor control
     break;
   case /* constant-expression */ Forward:
     /* code */
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_just, /*speed_A*/ speed,
-                                           /*direction_B*/ direction_just, /*speed_B*/ speed, /*controlED*/ control_enable); //Motor control
+                                           /*direction_B*/ direction_just, /*speed_B*/ speed, /*controlED*/ control_enable); // Motor control
     break;
   case /* constant-expression */ Backward:
     /* code */
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_back, /*speed_A*/ speed,
-                                           /*direction_B*/ direction_back, /*speed_B*/ speed, /*controlED*/ control_enable); //Motor control
+                                           /*direction_B*/ direction_back, /*speed_B*/ speed, /*controlED*/ control_enable); // Motor control
     break;
   case /* constant-expression */ RightForward:
     /* code */
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_back, /*speed_A*/ speed - 130,
-                                           /*direction_B*/ direction_just, /*speed_B*/ speed, /*controlED*/ control_enable); //Motor control
+                                           /*direction_B*/ direction_just, /*speed_B*/ speed, /*controlED*/ control_enable); // Motor control
     break;
   case /* constant-expression */ LeftForward:
     /* code */
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_just, /*speed_A*/ speed,
-                                           /*direction_B*/ direction_back, /*speed_B*/ speed - 130, /*controlED*/ control_enable); //Motor control
+                                           /*direction_B*/ direction_back, /*speed_B*/ speed - 130, /*controlED*/ control_enable); // Motor control
     break;
   case /* constant-expression */ LeftBackward:
     /* code */
-     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_back, /*speed_A*/ speed,
-                                           /*direction_B*/ direction_back, /*speed_B*/ speed - 130, /*controlED*/ control_enable); //Motor control
+    AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_back, /*speed_A*/ speed,
+                                           /*direction_B*/ direction_back, /*speed_B*/ speed - 130, /*controlED*/ control_enable); // Motor control
     break;
     break;
   case /* constant-expression */ RightBackward:
     /* code */
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_back, /*speed_A*/ speed - 130,
-                                           /*direction_B*/ direction_back, /*speed_B*/ speed, /*controlED*/ control_enable); //Motor control
+                                           /*direction_B*/ direction_back, /*speed_B*/ speed, /*controlED*/ control_enable); // Motor control
     break;
   case /* constant-expression */ stop_it:
     /* code */
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_void, /*speed_A*/ 0,
-                                           /*direction_B*/ direction_void, /*speed_B*/ 0, /*controlED*/ control_enable); //Motor control
+                                           /*direction_B*/ direction_void, /*speed_B*/ 0, /*controlED*/ control_enable); // Motor control
     break;
   default:
     break;
@@ -181,11 +181,9 @@ void ApplicationFunctionSet::ApplicationFunctionSet_Rocker(void)
 {
   if (Application_OwlBotxxx0.Functional_Mode == Rocker_mode)
   {
-    //When the car is turning... Slow down slightly
+    // When the car is turning... Slow down slightly
 
-
-      ApplicationFunctionSet_OwlBotMotionControl(Application_OwlBotxxx0.Motion_Control /*direction*/, 255 /*speed*/);
-
+    ApplicationFunctionSet_OwlBotMotionControl(Application_OwlBotxxx0.Motion_Control /*direction*/, 255 /*speed*/);
   }
 }
 /*
@@ -224,7 +222,7 @@ $ Shenzhen, China:Elegoo & HOU Changhua & 2019-09
 void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
 {
   String SerialPortData = "";
-  //1 #接收串口数据流
+  // 1 #接收串口数据流
   while ((Serial.available() > 0) && (false == SerialPortData.endsWith("}")))
   {
     SerialPortData += char(Serial.read());
@@ -235,17 +233,17 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
 #if _Test_print
     Serial.println(SerialPortData);
 #endif
-    //2#导入JsonDocument
-    StaticJsonDocument<200> doc;                                       //声明一个JsonDocument对象
-    DeserializationError error = deserializeJson(doc, SerialPortData); //反序列化JSON数据
-    if (!error)                                                        //检查反序列化是否成功
+    // 2#导入JsonDocument
+    StaticJsonDocument<200> doc;                                       // 声明一个JsonDocument对象
+    DeserializationError error = deserializeJson(doc, SerialPortData); // 反序列化JSON数据
+    if (!error)                                                        // 检查反序列化是否成功
     {
       int control_mode_N = doc["N"];
       char buf[3];
       uint8_t temp = doc["H"];
       sprintf(buf, "%d", temp);
-      CommandSerialNumber = buf; //获取新命令的序号
-      //3#解析并更新控制命令的信号量值
+      CommandSerialNumber = buf; // 获取新命令的序号
+      // 3#解析并更新控制命令的信号量值
       switch (control_mode_N) /*以下代码块请结合小车通讯协议V.docx 查看*/
       {
       case 1: /*<命令：N 1> */
@@ -259,6 +257,7 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
       case 5: /*<命令：N 5>*/
         break;
       case 6: /*<命令：N 6>*/
+
         break;
       case 7: /*<命令：N 7>*/
         break;
@@ -346,36 +345,36 @@ void ApplicationFunctionSet::ApplicationFunctionSet_ObstacleAvoidance(void)
   {
     // Read distance from ultrasonic sensor
     float distanceCm = AppUltrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
-    
+
     // Send distance data to Bluetooth
     static unsigned long lastBTSend = 0;
-    if (millis() - lastBTSend >= 500)  // Send every 500ms
+    if (millis() - lastBTSend >= 500) // Send every 500ms
     {
       lastBTSend = millis();
       BTSerial.print("DIST:");
       BTSerial.print(distanceCm, 1);
       BTSerial.println("cm");
-      
+
       Serial.print("Obstacle distance: ");
       Serial.print(distanceCm, 1);
       Serial.println(" cm");
     }
-    
+
     // Obstacle avoidance logic
     if (distanceCm < OBSTACLE_DISTANCE_CM && distanceCm > 0)
     {
       // Obstacle detected - stop and turn right
       Serial.println("Obstacle detected! Turning right...");
       BTSerial.println("OBSTACLE DETECTED - TURNING");
-      
+
       // Stop briefly
       ApplicationFunctionSet_OwlBotMotionControl(stop_it, 0);
       _delay(200);
-      
+
       // Turn right
       ApplicationFunctionSet_OwlBotMotionControl(Right, 200);
       _delay(500);
-      
+
       // Resume forward
       ApplicationFunctionSet_OwlBotMotionControl(Forward, 150);
     }
