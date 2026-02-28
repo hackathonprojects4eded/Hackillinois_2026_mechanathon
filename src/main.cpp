@@ -8,8 +8,8 @@ Robot robot;
 void setup()
 {
   Serial.begin(115200);
-  while (!Serial)
-    ;
+  // while (!Serial)
+  //   ;
 
   if (!robot.begin())
   {
@@ -18,26 +18,31 @@ void setup()
       ;
   }
   Serial.println("Robot initialized successfully");
+
+  robot.moveToWall(20, 180); // distance=20cm, baseSpeed=180/255
+
+  robot.stop();
+  delay(2000);
 }
 
 void loop()
 {
   // Example usage:
   // Move forward until reaching 20cm from wall
-  robot.moveToWall(20, 180); // distance=20cm, baseSpeed=180/255
+  // robot.moveToWall(20, 180); // distance=20cm, baseSpeed=180/255
 
-  // Turn to face left (-90 degrees)
-  robot.turnToAngle(-90, 5.0, true); // angle=-90, offset=5°, both wheels
+  // // Turn to face left (-90 degrees)
+  // robot.turnToAngle(-90, 5.0, true); // angle=-90, offset=5°, both wheels
 
-  // Move to wall again
-  robot.moveToWall(25, 180);
+  // // Move to wall again
+  // robot.moveToWall(25, 180);
 
-  // Turn to face right (90 degrees) using only outer wheel
-  robot.turnToAngle(90, 5.0, false); // angle=90, offset=5°, single wheel
+  // // Turn to face right (90 degrees) using only outer wheel
+  // robot.turnToAngle(90, 5.0, false); // angle=90, offset=5°, single wheel
 
   // Stop and wait
-  robot.stop();
-  delay(2000);
+  // robot.stop();
+  // delay(2000);
 }
 
 // #include "DeviceDriverSet_xxx0.h"

@@ -190,9 +190,9 @@ void Robot::_applyHeadingCorrection(uint8_t &speedA, uint8_t &speedB, float yaw)
     // Negative yaw means robot is tilted left, so speed up right motor (B)
     // Positive yaw means robot is tilted right, so speed up left motor (A)
 
-    const float YAW_THRESHOLD = 2.0f;  // Only correct if yaw error > threshold
+    const float YAW_THRESHOLD = 1.0f;  // Only correct if yaw error > threshold
     const uint8_t CORRECTION_RATE = 3; // PWM adjustment per degree of yaw
-    const uint8_t MIN_SPEED = 50;      // Prevent motors from stalling
+    const uint8_t MIN_SPEED = 100;     // Prevent motors from stalling
     const uint8_t MAX_CORRECTION = 50; // Max PWM adjustment
 
     if (fabs(yaw) > YAW_THRESHOLD)
