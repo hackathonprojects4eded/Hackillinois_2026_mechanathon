@@ -96,23 +96,20 @@ void Robot::turnToAngle(float targetAngle, float angleOffset, bool bothWheels)
     // Normalize target angle to [-180, 180]
     _targetTurnAngle = _normalizeAngle(_targetTurnAngle);
 
+    // PID controller parameters
+    const float Kp = 4.0f; // Proportional gain
+    const float Ki = 0.1f; // Integral gain
+    const float Kd = 1.5f; // Derivative gain (dampening)
+
+    float integralError = 0.0f;
+    float previousError = 0.0f;
+
     while (_isTurning)
     {
         imu.update();
         float currentYaw = imu.getFilteredYaw();
 
-        // Check if we're at target angle
-        if (_isAtTargetAngle(currentYaw, _targetTurnAngle, _turnAngleOffset))
-        {
-            stop();
-            _isTurning = false;
-            Serial.print("Reached target angle: ");
-            Serial.println(currentYaw);
-            return;
-        }
-
-        // Determine rotation direction
-        // Calculate the difference, accounting for yaw wraparound
+        // Calculate error
         float angleDiff = _targetTurnAngle - currentYaw;
 
         // Normalize the difference to [-180, 180]
@@ -121,35 +118,84 @@ void Robot::turnToAngle(float targetAngle, float angleOffset, bool bothWheels)
         else if (angleDiff < -180)
             angleDiff += 360;
 
-        // If positive diff, turn right; if negative, turn left
-        bool turnRight = (angleDiff > 0);
-        uint8_t turnSpeed = 150; // Moderate turning speed
+        float absError = fabs(angleDiff);
 
+        // Check if we're at target angle
+        if (absError <= _turnAngleOffset)
+        {
+            Serial.println("\n=== TARGET REACHED ===");
+            stop();
+            _isTurning = false;
+            Serial.print("Final angle: ");
+            Serial.println(currentYaw);
+            return;
+        }
+
+        // PID calculation
+        integralError += angleDiff;
+        float derivativeError = angleDiff - previousError;
+        previousError = angleDiff;
+
+        // PID output
+        float pidOutput = (Kp * angleDiff) + (Ki * integralError) + (Kd * derivativeError);
+
+        // Clamp integral to prevent windup
+        if (integralError > 50)
+            integralError = 50;
+        if (integralError < -50)
+            integralError = -50;
+
+        // Map PID output to motor speed [0-255]
+        // pidOutput sign determines direction
+        bool turnRight = (pidOutput > 0);
+        uint8_t turnSpeed = min(255, max(80, (uint8_t)fabs(pidOutput)));
+
+        // Debug output every 10 iterations
+        static unsigned long lastDebug = 0;
+        if (millis() - lastDebug > 100)
+        {
+            lastDebug = millis();
+            Serial.println("\n--- PID Debug ---");
+            Serial.print("Current Yaw: ");
+            Serial.println(currentYaw);
+            Serial.print("Target Yaw: ");
+            Serial.println(_targetTurnAngle);
+            Serial.print("Error: ");
+            Serial.println(angleDiff);
+            Serial.print("P: ");
+            Serial.print(Kp * angleDiff);
+            Serial.print(" | I: ");
+            Serial.print(Ki * integralError);
+            Serial.print(" | D: ");
+            Serial.println(Kd * derivativeError);
+            Serial.print("PID Output: ");
+            Serial.print(pidOutput);
+            Serial.print(" | Speed: ");
+            Serial.print(turnSpeed);
+            Serial.print(" | Direction: ");
+            Serial.println(turnRight ? "Right" : "Left");
+        }
+
+        // Apply motor control
         if (_turnBothWheels)
         {
-            // Both wheels rotate in opposite directions
             if (turnRight)
             {
-                // Turn right: left wheel forward, right wheel backward
                 motor.DeviceDriverSet_Motor_control(true, turnSpeed, false, turnSpeed, true);
             }
             else
             {
-                // Turn left: left wheel backward, right wheel forward
                 motor.DeviceDriverSet_Motor_control(false, turnSpeed, true, turnSpeed, true);
             }
         }
         else
         {
-            // Single wheel (outer wheel) rotation
             if (turnRight)
             {
-                // Turn right: only left wheel moves
                 motor.DeviceDriverSet_Motor_control(true, turnSpeed, true, 0, true);
             }
             else
             {
-                // Turn left: only right wheel moves
                 motor.DeviceDriverSet_Motor_control(true, 0, true, turnSpeed, true);
             }
         }

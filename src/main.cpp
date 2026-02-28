@@ -9,23 +9,11 @@ Robot robot;
 DeviceDriverSet_RBGLED led;
 DeviceDriverSet_passiveBuzzer buzzer;
 
-const uint8_t numColors = 6;
-const uint8_t colors[numColors][3] = {
-    {255, 0, 0},    // red
-    {0, 255, 0},    // green
-    {0, 0, 255},    // blue
-    {255, 165, 0},  // orange
-    {255, 255, 0},  // yellow
-    {255, 255, 255} // white
-};
-// cycle through some colors every 500ms
-static unsigned long lastChange = 0;
-static uint8_t idx = 0;
-
 void setup()
 {
   buzzer.DeviceDriverSet_passiveBuzzer_Init();
   buzzer.DeviceDriverSet_passiveBuzzer_Scale_c8(300);
+
   Serial.begin(115200);
   // while (!Serial)
   //   ;
@@ -56,39 +44,30 @@ void setup()
   led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Blue);
   delay(1000);
   led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
-}
 
-void controlBuzzer() {
-
+  robot.moveToWall(20, 180);
+  robot.turnToAngle(-90, 5.0, true);
+  robot.stop();
 }
 
 void loop()
 {
-  // robot.update();
-
-  // Serial.println(robot.getDistance());
-  //  controlLED();
+  robot.update();
 
   // Example usage:
   // Move forward until reaching 20cm from wall
   // robot.moveToWall(20, 180); // distance=20cm, baseSpeed=180/255
 
-  // // Turn to face left (-90 degrees)
-  // robot.turnToAngle(-90, 5.0, true); // angle=-90, offset=5°, both wheels
-  // // Turn to face left (-90 degrees)
+  // // // Turn to face left (-90 degrees)
   // robot.turnToAngle(-90, 5.0, true); // angle=-90, offset=5°, both wheels
 
-  // // Move to wall again
-  // robot.moveToWall(25, 180);
-  // // Move to wall again
-  // robot.moveToWall(25, 180);
+  // // // Move to wall again
+  // // robot.moveToWall(25, 180);
 
-  // // Turn to face right (90 degrees) using only outer wheel
-  // robot.turnToAngle(90, 5.0, false); // angle=90, offset=5°, single wheel
-  // // Turn to face right (90 degrees) using only outer wheel
-  // robot.turnToAngle(90, 5.0, false); // angle=90, offset=5°, single wheel
+  // // // Turn to face right (90 degrees) using only outer wheel
+  // // robot.turnToAngle(90, 5.0, false); // angle=90, offset=5°, single wheel
 
-  // Stop and wait
+  // // Stop and wait
   // robot.stop();
   // delay(2000);
 }
