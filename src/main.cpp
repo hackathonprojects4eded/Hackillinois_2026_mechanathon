@@ -20,8 +20,6 @@ const uint8_t colors[numColors][3] = {
 static unsigned long lastChange = 0;
 static uint8_t idx = 0;
 
-unsigned long now = millis();
-
 void setup()
 {
   Serial.begin(115200);
@@ -56,6 +54,7 @@ void setup()
 // autonomous LED pattern (ignores serial input)
 void controlLED()
 {
+  unsigned long now = millis();
 
   if (now - lastChange >= 500)
   {
