@@ -1,9 +1,11 @@
+#pragma once
+
 #ifndef IR_CONTROL_H
 #define IR_CONTROL_H
 
 #define _Test_DeviceDriverSet 0
 #include <Arduino.h>
-#define TimeCompensation 4 
+#define TimeCompensation 4
 extern unsigned long _millis();
 extern void _delay(unsigned long ms);
 

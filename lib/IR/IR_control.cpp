@@ -29,7 +29,7 @@ void DeviceDriverSet_STM8S003F3_IR::DeviceDriverSet_STM8S003F3_IR_Get(uint16_t *
   else
   {
     /* code */
-    //Serial.println("Contact Changhua :STM8S003F3_IR data error"); // print the character
+    // Serial.println("Contact Changhua :STM8S003F3_IR data error"); // print the character
     cout += 1;
     if (cout > 250)
     {

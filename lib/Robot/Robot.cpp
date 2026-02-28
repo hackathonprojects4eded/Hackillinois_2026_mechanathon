@@ -1,14 +1,11 @@
 #include "Robot.h"
 #include "motor_control.h"
+#include "IR_control.h"
 
 void Robot::init()
 {
     _motor.DeviceDriverSet_Motor_Init();
-
-    // Initialize IR sensor if available
-    // Uncomment if IR device driver is properly declared:
-    // _ir_sensor = &AppSTM8S003F3_IR;
-    // _ir_sensor->DeviceDriverSet_STM8S003F3_IR_Init();
+    _ir_sensor.DeviceDriverSet_STM8S003F3_IR_Init();
 }
 
 void Robot::move(Direction direction, uint8_t speed)
@@ -89,17 +86,7 @@ void Robot::stop()
 
 void Robot::getIRSensorValues(uint16_t &left_out, uint16_t &middle_out, uint16_t &right_out)
 {
-    if (_ir_sensor)
-    {
-        _ir_sensor->DeviceDriverSet_STM8S003F3_IR_Get(&left_out, &middle_out, &right_out);
-    }
-    else
-    {
-        // No IR sensor initialized
-        left_out = 0;
-        middle_out = 0;
-        right_out = 0;
-    }
+    _ir_sensor.DeviceDriverSet_STM8S003F3_IR_Get(&left_out, &middle_out, &right_out);
 }
 
 boolean Robot::isOnLine(uint16_t value)

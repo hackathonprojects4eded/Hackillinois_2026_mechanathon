@@ -3,9 +3,7 @@
 
 #include <Arduino.h>
 #include "motor_control.h"
-
-// Forward declare IR device driver
-class DeviceDriverSet_STM8S003F3_IR;
+#include "IR_control.h"
 
 /**
  * @class Robot
@@ -88,12 +86,12 @@ private:
     // Motor driver instance
     DeviceDriverSet_Motor _motor;
 
+    // IR sensor driver instance
+    DeviceDriverSet_STM8S003F3_IR _ir_sensor;
+
     // IR sensor tracking thresholds for line detection
     uint16_t _threshold_start = 500;
     uint16_t _threshold_end = 850;
-
-    // Pointer to IR sensor driver (injected during init)
-    DeviceDriverSet_STM8S003F3_IR *_ir_sensor = nullptr;
 };
 
 #endif // ROBOT_H
