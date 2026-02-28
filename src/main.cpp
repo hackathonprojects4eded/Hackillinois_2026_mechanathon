@@ -41,7 +41,6 @@ void setup()
   }
   Serial.println("Robot initialized successfully");
 
-  delay(5000);
   led.DeviceDriverSet_RBGLED_Color(NUM_LEDS,
                                    colors[2][0],
                                    colors[2][1],
@@ -56,7 +55,7 @@ void controlLED()
 {
   unsigned long now = millis();
 
-  if (now - lastChange >= 2000)
+  if (now - lastChange >= 500)
   {
     lastChange = now;
     led.DeviceDriverSet_RBGLED_Color(NUM_LEDS,

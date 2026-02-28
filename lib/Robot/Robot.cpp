@@ -36,15 +36,16 @@ void Robot::moveToWall(uint16_t distanceToWall, uint8_t baseSpeed)
     _targetDistance = distanceToWall;
     _moveBaseSpeed = baseSpeed;
     _isMoving = true;
-
     // Main movement loop
     while (_isMoving)
     {
         imu.update();
-        uint16_t currentDist = ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
+        uint16_t currentDist = (ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm() + ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm() + ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm() + ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm() + ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm()) / 5.0f;
+
+        Serial.println(currentDist);
 
         // Check if we've reached the target distance
-        if (currentDist <= _targetDistance)
+        if (currentDist <= _targetDistance && currentDist != 0)
         {
             stop();
             _isMoving = false;
@@ -61,6 +62,7 @@ void Robot::moveToWall(uint16_t distanceToWall, uint8_t baseSpeed)
 
         _applyHeadingCorrection(speedA, speedB, currentYaw);
 
+        Serial.println("Speeds");
         Serial.println(speedA);
         Serial.println(speedB);
         // Move forward with heading correction
