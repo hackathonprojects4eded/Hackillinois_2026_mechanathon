@@ -11,7 +11,8 @@ void MPU6050Wrapper::dmpDataReady()
 
 // ── Constructor ───────────────────────────────────────────────────────────────
 MPU6050Wrapper::MPU6050Wrapper()
-    : _dmpReady(false), _newDMPData(false), _devStatus(0), _packetSize(0)
+    : _dmpReady(false), _newDMPData(false), _devStatus(0), _packetSize(0),
+      _filteredYaw(0), _filteredPitch(0), _filteredRoll(0), _lastUpdateTime(0)
 {
     memset(&_orient, 0, sizeof(_orient));
     memset(&_raw, 0, sizeof(_raw));
@@ -81,6 +82,14 @@ bool MPU6050Wrapper::begin(bool calibrate)
     _packetSize = _mpu.dmpGetFIFOPacketSize();
     _dmpReady = true;
 
+    // Initialize Kalman filters with initial orientation
+    _lastUpdateTime = micros();
+    _kalmanPitch.setAngle(_orient.pitch);
+    _kalmanRoll.setAngle(_orient.roll);
+    _filteredPitch = _orient.pitch;
+    _filteredRoll = _orient.roll;
+    _filteredYaw = _orient.yaw;
+
     Serial.println(F("DMP ready!"));
     return true;
 }
@@ -134,6 +143,20 @@ void MPU6050Wrapper::_updateDMP()
     _orient.yaw = ypr[0] * 180.0f / M_PI;
     _orient.pitch = ypr[1] * 180.0f / M_PI;
     _orient.roll = ypr[2] * 180.0f / M_PI;
+
+    // Apply Kalman filter to pitch and roll
+    uint32_t now = micros();
+    float dt = (float)(now - _lastUpdateTime) / 1000000.0f;
+    _lastUpdateTime = now;
+
+    // Convert gyro rates from raw to deg/s (sensitivity = 131 LSB/deg/s for ±250°/s)
+    float gyroRatePitch = _raw.gy / 131.0f;
+    float gyroRateRoll = _raw.gx / 131.0f;
+
+    // Apply Kalman filter
+    _filteredPitch = _kalmanPitch.getAngle(_orient.pitch, gyroRatePitch, dt);
+    _filteredRoll = _kalmanRoll.getAngle(_orient.roll, gyroRateRoll, dt);
+    _filteredYaw = _orient.yaw;  // Yaw comes directly from DMP (gyro integration)
 #endif
 
 #if defined(OUTPUT_READABLE_REALACCEL) || defined(OUTPUT_READABLE_WORLDACCEL)

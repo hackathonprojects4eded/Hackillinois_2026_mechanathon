@@ -2,6 +2,7 @@
 
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
+#include "Kalman.h"
 
 #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
 #include "Wire.h"
@@ -16,9 +17,9 @@
 // #define OUTPUT_READABLE_EULER
 #define OUTPUT_READABLE_YAWPITCHROLL
 // #define OUTPUT_READABLE_REALACCEL
-#define OUTPUT_READABLE_WORLDACCEL
+// #define OUTPUT_READABLE_WORLDACCEL
 // #define OUTPUT_TEAPOT
-#define OUTPUT_READABLE_ACCELGYRO // raw accel/gyro (non-DMP)
+// #define OUTPUT_READABLE_ACCELGYRO // raw accel/gyro (non-DMP)
 // #define OUTPUT_BINARY_ACCELGYRO
 
 // ── Pin config ────────────────────────────────────────────────────────────────
@@ -74,6 +75,11 @@ public:
     // Print latest data to Serial according to enabled OUTPUT_* defines
     void printData();
 
+    // Kalman-filtered orientation (updated after DMP update)
+    float getFilteredYaw() const { return _filteredYaw; }
+    float getFilteredPitch() const { return _filteredPitch; }
+    float getFilteredRoll() const { return _filteredRoll; }
+
     // Direct access to the underlying driver
     MPU6050 &device() { return _mpu; }
 
@@ -95,6 +101,11 @@ private:
 
     OrientationData _orient;
     RawData _raw;
+
+    // Kalman filters for pitch and roll
+    Kalman _kalmanPitch, _kalmanRoll;
+    float _filteredYaw, _filteredPitch, _filteredRoll;
+    uint32_t _lastUpdateTime;
 
     // Teapot packet
     uint8_t _teapotPacket[14];
