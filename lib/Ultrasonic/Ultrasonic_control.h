@@ -27,7 +27,6 @@ public:
   // Convenience wrapper: get distance in millimeters.
   // Returns a float distance in mm using the same raw-unit assumption
   // (time-of-flight in microseconds). If raw units differ, adjust accordingly.
-  float DeviceDriverSet_ULTRASONIC_GetDistanceMm(void);
 };
 
 #endif

@@ -3,10 +3,14 @@
 #include "MPU6050Wrapper.h"
 #include "Ultrasonic_control.h"
 #include "servo_driver.h"
+#include "LED_control.h"
 
 
 // Ultrasonic driver instance
 DeviceDriverSet_ULTRASONIC ultrasonic;
+
+// LED driver instance
+DeviceDriverSet_RBGLED led;
 
 // Global Robot instance
 MPU6050Wrapper imu;
@@ -19,6 +23,9 @@ void setup()
   Serial.begin(115200);
   while (!Serial)
     ;
+  
+  led.DeviceDriverSet_RBGLED_Init(100);
+  
   ultrasonic.DeviceDriverSet_ULTRASONIC_Init();
   bool ret = imu.begin();
   if (!ret)
@@ -54,6 +61,21 @@ void loop()
     Serial.println(" cm");
   }
 }
+
+// LED Control Test Loop
+void testLEDs()
+{
+  // Red
+  led.DeviceDriverSet_RBGLED_Color(0, 255, 0, 0);
+  delay(200);
+  // Green
+  led.DeviceDriverSet_RBGLED_Color(0, 0, 255, 0);
+  delay(200);
+  // Blue
+  led.DeviceDriverSet_RBGLED_Color(0, 0, 0, 255);
+  delay(200);
+}
+
 
 // #include "DeviceDriverSet_xxx0.h"
 // #include "ApplicationFunctionSet_xxx0.h"
