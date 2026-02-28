@@ -1,5 +1,8 @@
 #pragma once
 
+#include "motor_control.h"
+#include "IR_control.h"
+
 #ifndef _I2CDEV_H_
 #define _I2CDEV_H_
 #define I2CDEV_IMPLEMENTATION I2CDEV_ARDUINO_WIRE

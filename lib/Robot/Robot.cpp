@@ -1,6 +1,7 @@
 #include "Robot.h"
 #include "motor_control.h"
 #include "IR_control.h"
+#include "I2Cdev.h"
 
 void Robot::init()
 {
