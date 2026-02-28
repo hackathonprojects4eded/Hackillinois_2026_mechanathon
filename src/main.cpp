@@ -33,23 +33,23 @@ void setup()
   led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
 
   robot.moveToWall(20, 180);
-  // robot.turnToAngle(-90, 2.0, true);
-  // robot.update();
+  robot.turnToAngle(-90, 2.0, true);
+  robot.update();
 
-  // delay(3000);
+  delay(3000);
 
-  // robot.moveToWall(20, 180);
-  // robot.turnToAngle(-180, 2.0, true);
-  // robot.stop();
+  robot.moveToWall(20, 180);
+  robot.turnToAngle(-180, 2.0, true);
+  robot.stop();
 }
 
 void loop()
 {
   robot.update();
 
-  // Serial.println("----");
-  // Serial.println(robot.getRow());
-  // Serial.println(robot.getPitch());
+  Serial.println("----");
+  Serial.println(robot.getRow());
+  Serial.println(robot.getPitch());
 }
 
 // #include "DeviceDriverSet_xxx0.h"

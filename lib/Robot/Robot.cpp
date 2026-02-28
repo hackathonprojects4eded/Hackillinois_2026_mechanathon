@@ -114,6 +114,8 @@ void Robot::turnToAngle(float targetAngle, float angleOffset, bool bothWheels)
 
     _targetTurnAngle = _normalizeAngle(_targetTurnAngle);
 
+    uint8_t SPEED = 225;
+
     while (_isTurning)
     {
         imu.update();
@@ -138,19 +140,22 @@ void Robot::turnToAngle(float targetAngle, float angleOffset, bool bothWheels)
 
         if (_turnBothWheels)
         {
+            bool dirA = (angleDiff < 0);
+            uint8_t pwmA = SPEED;
+            bool dirB = (angleDiff > 0);
+            uint8_t pwmB = SPEED;
 
-            motor.DeviceDriverSet_Motor_control(
-                true, 225, false, 225, true);
+            motor.DeviceDriverSet_Motor_control(dirA, pwmA, dirB, pwmB, true);
         }
         else
         {
             if (angleDiff > 0)
             {
-                motor.DeviceDriverSet_Motor_control(direction_just, 225, direction_just, 0, true);
+                motor.DeviceDriverSet_Motor_control(direction_just, SPEED, direction_just, 0, true);
             }
             else
             {
-                motor.DeviceDriverSet_Motor_control(direction_just, 0, direction_just, 225, true);
+                motor.DeviceDriverSet_Motor_control(direction_just, 0, direction_just, SPEED, true);
             }
         }
 
