@@ -55,6 +55,8 @@ void controlLED()
 
 void loop()
 {
+  controlLED();
+
   // Example usage:
   // Move forward until reaching 20cm from wall
   // robot.moveToWall(20, 180); // distance=20cm, baseSpeed=180/255
