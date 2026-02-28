@@ -28,10 +28,11 @@ float DeviceDriverSet_ULTRASONIC::DeviceDriverSet_ULTRASONIC_GetDistanceCm(void)
   uint16_t raw = 0;
   DeviceDriverSet_ULTRASONIC_Get(&raw);
 
-  float distanceCm = raw / 58.0f;
+  float distanceCm = raw / 10.0f;
 
   if (raw == 0 || distanceCm > 500.0f)
     return -1.0f;
+
 
   return distanceCm;
 }
