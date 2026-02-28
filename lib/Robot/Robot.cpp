@@ -10,6 +10,11 @@ Robot::Robot()
 
 bool Robot::begin()
 {
+    robotTargetYaw = 0;
+
+    Application_FunctionSet.ApplicationFunctionSet_Init();
+    Application_FunctionSet.SetFunctionalMode(3); // Rocker_mode
+
     servo.attach(3);
     servo.write(90);
     servo.refresh();
@@ -27,31 +32,42 @@ bool Robot::begin()
     return true;
 }
 
-void Robot::update()
+void Robot::update(bool manual)
 {
-    uint16_t rawDist = ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
-    delay(20);
-    rawDist += ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
-    rawDist /= 2;
-    // Serial.println("----");
-    // Serial.println(rawDist);
-    if (!(rawDist > 5000 || rawDist == 150 || rawDist == 149))
+    Application_FunctionSet.ApplicationFunctionSet_SerialPortDataAnalysis();
+    if (!manual)
     {
-        _lastFilteredDistance = (uint16_t)ultrasonicFilter.updateEstimate((float)rawDist);
+        uint16_t rawDist = ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
+        delay(20);
+        rawDist += ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
+        rawDist /= 2;
+        // Serial.println("----");
+        // Serial.println(rawDist);
+        if (!(rawDist > 5000 || rawDist == 150 || rawDist == 149))
+        {
+            _lastFilteredDistance = (uint16_t)ultrasonicFilter.updateEstimate((float)rawDist);
+        }
+        else
+        {
+            _lastFilteredDistance = 69;
+        }
+        // Serial.println(_lastFilteredDistance);
+
+        imu.update();
+        servo.refresh();
+        delay(20);
     }
     else
     {
-        _lastFilteredDistance = 69;
+        Application_FunctionSet.ApplicationFunctionSet_Rocker();
+        Application_FunctionSet.CMD_ClearAllFunctionsXXX();
     }
-    // Serial.println(_lastFilteredDistance);
-
-    imu.update();
-    servo.refresh();
-    delay(20);
 }
 
-void Robot::moveToWall(uint16_t distanceToWall, uint8_t baseSpeed)
+void Robot::moveToWall(uint16_t distanceToWall, uint8_t baseSpeed, bool manual)
 {
+    if (manual)
+        return;
     // Validate parameters
     if (distanceToWall >= 40)
     {
@@ -64,7 +80,7 @@ void Robot::moveToWall(uint16_t distanceToWall, uint8_t baseSpeed)
     _isMoving = true;
     while (_isMoving)
     {
-        update();
+        update(manual);
         uint16_t currentDist = _lastFilteredDistance;
 
         Serial.println(currentDist);
@@ -85,7 +101,7 @@ void Robot::moveToWall(uint16_t distanceToWall, uint8_t baseSpeed)
         uint8_t speedA = _moveBaseSpeed;
         uint8_t speedB = _moveBaseSpeed;
 
-        _applyHeadingCorrection(speedA, speedB, currentYaw);
+        _applyHeadingCorrection(speedA, speedB, currentYaw - robotTargetYaw);
 
         Serial.println("Speeds");
         Serial.println(speedA);
@@ -104,9 +120,12 @@ void Robot::moveToWall(uint16_t distanceToWall, uint8_t baseSpeed)
     }
 }
 
-void Robot::turnToAngle(float targetAngle, float angleOffset, bool bothWheels)
+void Robot::turnToAngle(float targetAngle, float angleOffset, bool bothWheels, bool manual)
 {
+    if (manual)
+        return;
     float adjustedTargetAngle = _reverseAngle(targetAngle);
+    robotTargetYaw = _reverseAngle(targetAngle);
 
     _targetTurnAngle = adjustedTargetAngle;
     _turnAngleOffset = angleOffset;
@@ -138,6 +157,11 @@ void Robot::turnToAngle(float targetAngle, float angleOffset, bool bothWheels)
 
         float angleDiff = _targetTurnAngle - currentYaw;
         angleDiff = _normalizeAngle(angleDiff);
+
+        if (abs(angleDiff) < 20)
+        {
+            SPEED = 150;
+        }
 
         if (_turnBothWheels)
         {
@@ -225,7 +249,7 @@ void Robot::_applyHeadingCorrection(uint8_t &speedA, uint8_t &speedB, float yaw)
             // Tilted right, speed up left motor (A)
             speedA = min((uint8_t)(speedA + correction), 255);
             speedB = max((uint8_t)(speedB - correction), MIN_SPEED);
-            led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Amethyst);
+            led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Red);
             delay(1000);
             led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
         }

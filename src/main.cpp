@@ -4,6 +4,8 @@
 
 Robot robot;
 
+bool MANUAL_MODE = false;
+
 void setup()
 {
   Serial.begin(115200);
@@ -20,7 +22,7 @@ void setup()
 
   for (int i = 0; i < 10; i++)
   {
-    robot.update();
+    robot.update(MANUAL_MODE);
     Serial.println(robot.getDistance());
   }
 
@@ -30,7 +32,7 @@ void setup()
 
   robot.moveToWall(20, 180);
   robot.turnToAngle(-90, 5.0, true);
-  robot.update();
+  robot.update(MANUAL_MODE);
 
   delay(3000);
 
@@ -41,7 +43,7 @@ void setup()
 
 void loop()
 {
-  robot.update();
+  robot.update(MANUAL_MODE);
 
   Serial.println("----");
   Serial.println(robot.getRow());
@@ -66,8 +68,8 @@ void loop()
 // void loop()
 // {
 //   // put your main code here, to run repeatedly:
-//   Application_FunctionSet.ApplicationFunctionSet_SerialPortDataAnalysis();
-//   Application_FunctionSet.ApplicationFunctionSet_Rocker();
-//   Application_FunctionSet.ApplicationFunctionSet_ObstacleAvoidance();  // Enable obstacle avoidance
-//   Application_FunctionSet.CMD_ClearAllFunctionsXXX();
+// Application_FunctionSet.ApplicationFunctionSet_SerialPortDataAnalysis();
+// Application_FunctionSet.ApplicationFunctionSet_Rocker();
+// Application_FunctionSet.ApplicationFunctionSet_ObstacleAvoidance();  // Enable obstacle avoidance
+// Application_FunctionSet.CMD_ClearAllFunctionsXXX();
 // }

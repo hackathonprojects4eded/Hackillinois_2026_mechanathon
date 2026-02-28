@@ -14,20 +14,18 @@
 
 #include "ArduinoJson-v6.11.1.h" //ArduinoJson
 #include <SoftwareSerial.h>
-#include "Ultrasonic_control.h"
 
 #define _is_print 1
 #define _Test_print 0 // When testing, remember to set 0 after using the test to save controller resources and load.
 
 /*硬件设备成员对象序列*/
 DeviceDriverSet_Motor AppMotor;
-DeviceDriverSet_ULTRASONIC AppUltrasonic;
 
 // Bluetooth instance (RX=10, TX=11)
 SoftwareSerial BTSerial(10, 11);
 
-#define OBSTACLE_DISTANCE_CM 20  // Obstacle detected if closer than 20cm
-bool autonomous_mode = true;
+#define OBSTACLE_DISTANCE_CM 20 // Obstacle detected if closer than 20cm
+extern bool MANUAL_MODE;
 
 /*f(x) int */
 static boolean function_xxx(long x, long s, long e) // f(x)
@@ -86,15 +84,14 @@ Application_xxx Application_OwlBotxxx0;
 
 void ApplicationFunctionSet::ApplicationFunctionSet_Init(void)
 {
-  Serial.begin(9600);
-  AppMotor.DeviceDriverSet_Motor_Init();
+  // AppMotor.DeviceDriverSet_Motor_Init();
 
   // Initialize Bluetooth
   BTSerial.begin(9600);
   delay(50);
 
   // Initialize Ultrasonic sensor
-  AppUltrasonic.DeviceDriverSet_ULTRASONIC_Init();
+  // AppUltrasonic.DeviceDriverSet_ULTRASONIC_Init();
 
   Serial.println("System initialized: Motor, Bluetooth, Ultrasonic ready.");
 }
@@ -279,7 +276,7 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
         break;
       case 100:                                                                      /*<命令：N 100>*/
         Application_OwlBotxxx0.Functional_Mode = CMD_ClearAllFunctions_Standby_mode; /*清除功能：进入空闲模式*/
-        autonomous_mode = false;
+        MANUAL_MODE = true;
         break;
       case 101: /*<命令：N 101>*/
 
@@ -324,64 +321,10 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
           Application_OwlBotxxx0.Motion_Control = stop_it;
           break;
         }
-#if _is_print
-// Serial.print('{' + CommandSerialNumber + "_ok}");
-#endif
         break;
       default:
         break;
       }
-    }
-  }
-}
-
-/*
- Obstacle Avoidance: Detect obstacles and turn the robot
- Sends distance data over Bluetooth and automatically avoids obstacles
-*/
-void ApplicationFunctionSet::ApplicationFunctionSet_ObstacleAvoidance(void)
-{
-  if (Application_OwlBotxxx0.Functional_Mode == ObstacleAvoidance_mode)
-  {
-    // Read distance from ultrasonic sensor
-    float distanceCm = AppUltrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
-
-    // Send distance data to Bluetooth
-    static unsigned long lastBTSend = 0;
-    if (millis() - lastBTSend >= 500) // Send every 500ms
-    {
-      lastBTSend = millis();
-      BTSerial.print("DIST:");
-      BTSerial.print(distanceCm, 1);
-      BTSerial.println("cm");
-
-      Serial.print("Obstacle distance: ");
-      Serial.print(distanceCm, 1);
-      Serial.println(" cm");
-    }
-
-    // Obstacle avoidance logic
-    if (distanceCm < OBSTACLE_DISTANCE_CM && distanceCm > 0)
-    {
-      // Obstacle detected - stop and turn right
-      Serial.println("Obstacle detected! Turning right...");
-      BTSerial.println("OBSTACLE DETECTED - TURNING");
-
-      // Stop briefly
-      ApplicationFunctionSet_OwlBotMotionControl(stop_it, 0);
-      _delay(200);
-
-      // Turn right
-      ApplicationFunctionSet_OwlBotMotionControl(Right, 200);
-      _delay(500);
-
-      // Resume forward
-      ApplicationFunctionSet_OwlBotMotionControl(Forward, 150);
-    }
-    else
-    {
-      // No obstacle, move forward
-      ApplicationFunctionSet_OwlBotMotionControl(Forward, 180);
     }
   }
 }
