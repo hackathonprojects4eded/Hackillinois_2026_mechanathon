@@ -24,11 +24,18 @@ bool Robot::begin()
 void Robot::update()
 {
     uint16_t rawDist = ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
+    delay(20);
+    rawDist += ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
+    rawDist /= 2;
     // Serial.println("----");
     // Serial.println(rawDist);
     if (!(rawDist > 5000 || rawDist == 150 || rawDist == 149 || rawDist == 0))
     {
         _lastFilteredDistance = (uint16_t)ultrasonicFilter.updateEstimate((float)rawDist);
+    }
+    else
+    {
+        _lastFilteredDistance = 69;
     }
     // Serial.println(_lastFilteredDistance);
 
@@ -96,12 +103,16 @@ void Robot::turnToAngle(float targetAngle, float angleOffset, bool bothWheels)
     // Normalize target angle to [-180, 180]
     _targetTurnAngle = _normalizeAngle(_targetTurnAngle);
 
+    const float PROPORTIONAL_GAIN = 2.0f; // Controls how aggressive the turn is
+    const uint8_t MAX_SPEED = 255;
+    const uint8_t MIN_SPEED = 150;
+
     while (_isTurning)
     {
-        buzzer.DeviceDriverSet_passiveBuzzer_controlMonosyllabic(0, 100);
-
         imu.update();
         float currentYaw = imu.getFilteredYaw();
+        Serial.println(currentYaw);
+        Serial.println(_targetTurnAngle);
 
         // Check if we're at target angle
         if (_isAtTargetAngle(currentYaw, _targetTurnAngle, _turnAngleOffset))
@@ -113,8 +124,7 @@ void Robot::turnToAngle(float targetAngle, float angleOffset, bool bothWheels)
             return;
         }
 
-        // Determine rotation direction
-        // Calculate the difference, accounting for yaw wraparound
+        // Calculate angle error
         float angleDiff = _targetTurnAngle - currentYaw;
 
         // Normalize the difference to [-180, 180]
@@ -123,45 +133,45 @@ void Robot::turnToAngle(float targetAngle, float angleOffset, bool bothWheels)
         else if (angleDiff < -180)
             angleDiff += 360;
 
-        // If positive diff, turn right; if negative, turn left
-        bool turnRight = (angleDiff > 0);
+        // Proportional control: error to speed conversion
+        float err = angleDiff * PROPORTIONAL_GAIN;
 
-        // Calculate proportional speed: slower as we approach target
-        float absDiff = fabs(angleDiff);
-        uint8_t turnSpeed = 255; // Start at max speed
-
-        // Reduce speed as we get closer (proportional control)
-        if (absDiff < 30)
+        // Clamp to speed limits
+        if (fabs(err) > MAX_SPEED)
         {
-            turnSpeed = max(100, (uint8_t)(100 + (absDiff / 30.0f) * 155));
+            err = (err / fabs(err)) * MAX_SPEED;
         }
+        if (fabs(err) < MIN_SPEED && fabs(err) > 0.1f)
+        {
+            err = (err / fabs(err)) * MIN_SPEED;
+        }
+
+        // Convert error to motor speeds
+        // Positive err = turn right: left motor forward, right motor backward
+        // Negative err = turn left: left motor backward, right motor forward
+        int8_t speedA = (int8_t)(-err); // Left motor
+        int8_t speedB = (int8_t)(err);  // Right motor
 
         if (_turnBothWheels)
         {
             // Both wheels rotate in opposite directions
-            if (turnRight)
-            {
-                // Turn right: left wheel forward, right wheel backward
-                motor.DeviceDriverSet_Motor_control(true, turnSpeed, false, turnSpeed, true);
-            }
-            else
-            {
-                // Turn left: left wheel backward, right wheel forward
-                motor.DeviceDriverSet_Motor_control(false, turnSpeed, true, turnSpeed, true);
-            }
+            motor.DeviceDriverSet_Motor_control(
+                speedA >= 0, abs(speedA), // Motor A
+                speedB >= 0, abs(speedB), // Motor B
+                true);                    // Control enabled
         }
         else
         {
             // Single wheel (outer wheel) rotation
-            if (turnRight)
+            if (err > 0)
             {
-                // Turn right: only left wheel moves
-                motor.DeviceDriverSet_Motor_control(true, turnSpeed, true, 0, true);
+                // Turn right: only left wheel moves forward
+                motor.DeviceDriverSet_Motor_control(true, abs(speedA), true, 0, true);
             }
             else
             {
-                // Turn left: only right wheel moves
-                motor.DeviceDriverSet_Motor_control(true, 0, true, turnSpeed, true);
+                // Turn left: only right wheel moves forward
+                motor.DeviceDriverSet_Motor_control(true, 0, true, abs(speedB), true);
             }
         }
 

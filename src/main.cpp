@@ -39,8 +39,6 @@ void setup()
     Serial.println(robot.getDistance());
   }
 
-  robot.moveToWall(20, 180);
-  robot.stop();
   led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Blue);
   delay(1000);
   led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
