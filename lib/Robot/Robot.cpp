@@ -24,15 +24,16 @@ bool Robot::begin()
 void Robot::update()
 {
     uint16_t rawDist = ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
-    Serial.println("----");
-    Serial.println(rawDist);
+    // Serial.println("----");
+    // Serial.println(rawDist);
     if (!(rawDist > 5000 || rawDist == 150 || rawDist == 149 || rawDist == 0))
     {
         _lastFilteredDistance = (uint16_t)ultrasonicFilter.updateEstimate((float)rawDist);
     }
-    Serial.println(_lastFilteredDistance);
+    // Serial.println(_lastFilteredDistance);
 
     imu.update();
+    delay(20);
 }
 
 void Robot::moveToWall(uint16_t distanceToWall, uint8_t baseSpeed)
