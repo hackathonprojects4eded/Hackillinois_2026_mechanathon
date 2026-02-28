@@ -2,10 +2,12 @@
 
 #include "Robot.h"
 #include "LED_control.h"
+#include "Buzzer_control.h"
 
 // Global Robot instance
 Robot robot;
 DeviceDriverSet_RBGLED led;
+DeviceDriverSet_passiveBuzzer buzzer;
 
 const uint8_t numColors = 6;
 const uint8_t colors[numColors][3] = {
@@ -22,6 +24,8 @@ static uint8_t idx = 0;
 
 void setup()
 {
+  buzzer.DeviceDriverSet_passiveBuzzer_Init();
+  buzzer.DeviceDriverSet_passiveBuzzer_Scale_c8(300);
   Serial.begin(115200);
   // while (!Serial)
   //   ;
@@ -52,6 +56,10 @@ void setup()
   led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Blue);
   delay(1000);
   led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
+}
+
+void controlBuzzer() {
+
 }
 
 void loop()
