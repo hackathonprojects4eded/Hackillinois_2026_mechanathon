@@ -12,7 +12,7 @@ DeviceDriverSet_passiveBuzzer buzzer;
 void setup()
 {
   buzzer.DeviceDriverSet_passiveBuzzer_Init();
-  buzzer.DeviceDriverSet_passiveBuzzer_Scale_c8(300);
+  buzzer.DeviceDriverSet_passiveBuzzer_Scale_c8(100);
 
   Serial.begin(115200);
   // while (!Serial)
