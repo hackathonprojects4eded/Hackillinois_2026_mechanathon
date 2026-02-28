@@ -27,8 +27,8 @@ void setup()
   buzzer.DeviceDriverSet_passiveBuzzer_Init();
   buzzer.DeviceDriverSet_passiveBuzzer_Scale_c8(300);
   Serial.begin(115200);
-  while (!Serial)
-    ;
+  // while (!Serial)
+  //   ;
 
   // initialize LEDs for app control
   led.DeviceDriverSet_RBGLED_Init(95);
@@ -45,8 +45,14 @@ void setup()
   }
   Serial.println("Robot initialized successfully");
 
-  // robot.moveToWall(20, 180);
-  // robot.stop();
+  for (int i = 0; i < 10; i++)
+  {
+    robot.update();
+    Serial.println(robot.getDistance());
+  }
+
+  robot.moveToWall(20, 180);
+  robot.stop();
   led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Blue);
   delay(1000);
   led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
@@ -58,7 +64,7 @@ void controlBuzzer() {
 
 void loop()
 {
-  robot.update();
+  // robot.update();
 
   // Serial.println(robot.getDistance());
   //  controlLED();
