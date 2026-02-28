@@ -1,11 +1,8 @@
 #include <Arduino.h>
 
 #include "Robot.h"
-#include "LED_control.h"
-#include "Buzzer_control.h"
 
 Robot robot;
-DeviceDriverSet_RBGLED led;
 
 void setup()
 {
@@ -20,7 +17,6 @@ void setup()
   Serial.println("Robot initialized successfully");
 
   robot.buzzer.DeviceDriverSet_passiveBuzzer_Scale_c8(100);
-  led.DeviceDriverSet_RBGLED_Init(95);
 
   for (int i = 0; i < 10; i++)
   {
@@ -28,18 +24,18 @@ void setup()
     Serial.println(robot.getDistance());
   }
 
-  led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Blue);
+  robot.led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Blue);
   delay(1000);
-  led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
+  robot.led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
 
   robot.moveToWall(20, 180);
-  robot.turnToAngle(-90, 2.0, true);
+  robot.turnToAngle(-90, 5.0, true);
   robot.update();
 
   delay(3000);
 
   robot.moveToWall(20, 180);
-  robot.turnToAngle(-180, 2.0, true);
+  robot.turnToAngle(-180, 5.0, true);
   robot.stop();
 }
 

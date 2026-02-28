@@ -6,6 +6,7 @@
 #include "SimpleKalmanFilter.h"
 #include "Buzzer_control.h"
 #include <Adafruit_SoftServo.h>
+#include "LED_control.h"
 
 class Robot
 {
@@ -42,6 +43,7 @@ private:
 
 public:
     DeviceDriverSet_passiveBuzzer buzzer; // added buzzer for audio cues
+    DeviceDriverSet_RBGLED led;
     Robot();
 
     // Initialize robot components

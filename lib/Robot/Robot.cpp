@@ -17,6 +17,7 @@ bool Robot::begin()
     motor.DeviceDriverSet_Motor_Init();
     ultrasonic.DeviceDriverSet_ULTRASONIC_Init();
     buzzer.DeviceDriverSet_passiveBuzzer_Init();
+    led.DeviceDriverSet_RBGLED_Init(95);
     bool ret = imu.begin();
     if (!ret)
     {
@@ -114,7 +115,7 @@ void Robot::turnToAngle(float targetAngle, float angleOffset, bool bothWheels)
 
     _targetTurnAngle = _normalizeAngle(_targetTurnAngle);
 
-    uint8_t SPEED = 225;
+    uint8_t SPEED = 200;
 
     while (_isTurning)
     {
@@ -210,17 +211,23 @@ void Robot::_applyHeadingCorrection(uint8_t &speedA, uint8_t &speedB, float yaw)
     {
         uint8_t correction = min((uint8_t)(fabs(yaw) * CORRECTION_RATE), MAX_CORRECTION);
 
-        if (yaw < 0)
+        if (yaw > 0)
         {
             // Tilted left, speed up right motor (B)
             speedA = max((uint8_t)(speedA - correction), MIN_SPEED);
             speedB = min((uint8_t)(speedB + correction), 255);
+            led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Blue);
+            delay(1000);
+            led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
         }
         else
         {
             // Tilted right, speed up left motor (A)
             speedA = min((uint8_t)(speedA + correction), 255);
             speedB = max((uint8_t)(speedB - correction), MIN_SPEED);
+            led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Amethyst);
+            delay(1000);
+            led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
         }
     }
 }
