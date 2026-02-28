@@ -56,7 +56,7 @@ void controlLED()
 {
   unsigned long now = millis();
 
-  if (now - lastChange >= 500)
+  if (now - lastChange >= 2000)
   {
     lastChange = now;
     led.DeviceDriverSet_RBGLED_Color(NUM_LEDS,

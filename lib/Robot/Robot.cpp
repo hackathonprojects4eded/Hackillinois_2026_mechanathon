@@ -43,40 +43,33 @@ void Robot::moveToWall(uint16_t distanceToWall, uint8_t baseSpeed)
         imu.update();
         uint16_t currentDist = ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
 
-        // Start active movement once within detection range
-        if (currentDist < 40)
+        // Check if we've reached the target distance
+        if (currentDist <= _targetDistance)
         {
-            // Check if we've reached the target distance
-            if (currentDist <= _targetDistance)
-            {
-                stop();
-                _isMoving = false;
-                Serial.print("Reached wall at distance: ");
-                Serial.print(currentDist);
-                Serial.println(" cm");
-                return;
-            }
-
-            // Get current yaw and apply heading correction
-            float currentYaw = imu.getFilteredYaw();
-            uint8_t speedA = _moveBaseSpeed;
-            uint8_t speedB = _moveBaseSpeed;
-
-            _applyHeadingCorrection(speedA, speedB, currentYaw);
-
-            // Move forward with heading correction
-            motor.DeviceDriverSet_Motor_control(
-                true, speedA, // Motor A: forward with corrected speed
-                true, speedB, // Motor B: forward with corrected speed
-                true);        // Control enabled
-        }
-        else
-        {
-            // Wait until within detection range
-            motor.DeviceDriverSet_Motor_control(true, 0, true, 0, true);
+            stop();
+            _isMoving = false;
+            Serial.print("Reached wall at distance: ");
+            Serial.print(currentDist);
+            Serial.println(" cm");
+            return;
         }
 
-        delay(20); // Small delay for sensor polling
+        // Get current yaw and apply heading correction
+        float currentYaw = imu.getFilteredYaw();
+        uint8_t speedA = _moveBaseSpeed;
+        uint8_t speedB = _moveBaseSpeed;
+
+        _applyHeadingCorrection(speedA, speedB, currentYaw);
+
+        Serial.println(speedA);
+        Serial.println(speedB);
+        // Move forward with heading correction
+        motor.DeviceDriverSet_Motor_control(
+            true, speedA, // Motor A: forward with corrected speed
+            true, speedB, // Motor B: forward with corrected speed
+            true);        // Control enabled
+
+        // delay(20); // Small delay for sensor polling
     }
 }
 
