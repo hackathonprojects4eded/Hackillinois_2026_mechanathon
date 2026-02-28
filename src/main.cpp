@@ -4,19 +4,12 @@
 #include "LED_control.h"
 #include "Buzzer_control.h"
 
-// Global Robot instance
 Robot robot;
 DeviceDriverSet_RBGLED led;
-DeviceDriverSet_passiveBuzzer buzzer;
 
 void setup()
 {
   Serial.begin(115200);
-
-  buzzer.DeviceDriverSet_passiveBuzzer_Init();
-  buzzer.DeviceDriverSet_passiveBuzzer_Scale_c8(100);
-
-  led.DeviceDriverSet_RBGLED_Init(95);
 
   if (!robot.begin())
   {
@@ -25,6 +18,9 @@ void setup()
       ;
   }
   Serial.println("Robot initialized successfully");
+
+  robot.buzzer.DeviceDriverSet_passiveBuzzer_Scale_c8(100);
+  led.DeviceDriverSet_RBGLED_Init(95);
 
   for (int i = 0; i < 10; i++)
   {
@@ -49,7 +45,7 @@ void setup()
 
 void loop()
 {
-  // robot.update();
+  robot.update();
 
   // Serial.println("----");
   // Serial.println(robot.getRow());

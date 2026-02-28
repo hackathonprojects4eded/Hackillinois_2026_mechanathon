@@ -5,6 +5,7 @@
 #include "motor_control.h"
 #include "SimpleKalmanFilter.h"
 #include "Buzzer_control.h"
+#include <Adafruit_SoftServo.h>
 
 class Robot
 {
@@ -12,9 +13,11 @@ private:
     MPU6050Wrapper imu;
     DeviceDriverSet_ULTRASONIC ultrasonic;
     DeviceDriverSet_Motor motor;
-    DeviceDriverSet_passiveBuzzer buzzer; // added buzzer for audio cues
-    SimpleKalmanFilter ultrasonicFilter;  // Kalman filter for ultrasonic distance
-    uint16_t _lastFilteredDistance;       // Store last filtered distance value
+
+    Adafruit_SoftServo servo;
+
+    SimpleKalmanFilter ultrasonicFilter; // Kalman filter for ultrasonic distance
+    uint16_t _lastFilteredDistance;      // Store last filtered distance value
 
     // Movement state
     bool _isMoving;
@@ -38,6 +41,7 @@ private:
     float _reverseAngle(float angle);       // Reverse an angle if head is reversed
 
 public:
+    DeviceDriverSet_passiveBuzzer buzzer; // added buzzer for audio cues
     Robot();
 
     // Initialize robot components

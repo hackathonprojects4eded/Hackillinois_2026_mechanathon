@@ -10,8 +10,13 @@ Robot::Robot()
 
 bool Robot::begin()
 {
+    servo.attach(3);
+    servo.write(90);
+    servo.refresh();
+
     motor.DeviceDriverSet_Motor_Init();
     ultrasonic.DeviceDriverSet_ULTRASONIC_Init();
+    buzzer.DeviceDriverSet_passiveBuzzer_Init();
     bool ret = imu.begin();
     if (!ret)
     {
@@ -40,6 +45,7 @@ void Robot::update()
     // Serial.println(_lastFilteredDistance);
 
     imu.update();
+    servo.refresh();
     delay(20);
 }
 
