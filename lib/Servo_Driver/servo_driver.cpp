@@ -6,18 +6,18 @@ ServoDriver::ServoDriver(uint8_t pin) {
 }
 
 void ServoDriver::begin(){
-    _servo.attatch(pin);
+    _servo.attach(_pin);
     _servo.write(_currentAngle);
 }
 
 void ServoDriver::set_angle(int angle) {
-    angle = constrain(0, 180);
+    angle = constrain(angle, 0, 180);
     _currentAngle = angle;
     _servo.write(angle);
 }
 
-void ServoDriver::move_anglge(int targetAngle) {
-    targetAngle = constrain(0, 180);
+void ServoDriver::move_angle(int targetAngle) {
+    targetAngle = constrain(targetAngle, 0, 180);
     while (_currentAngle != targetAngle) {
         if (_currentAngle < targetAngle) {
             _currentAngle++;
