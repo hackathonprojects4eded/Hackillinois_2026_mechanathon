@@ -32,43 +32,28 @@ void setup()
   if (!robot.begin())
   {
     Serial.println("Failed to initialize robot");
-    led.DeviceDriverSet_RBGLED_Color(NUM_LEDS,
-                                     colors[0][0],
-                                     colors[0][1],
-                                     colors[0][2]);
+    // led.DeviceDriverSet_RBGLED_Color(NUM_LEDS,
+    //                                  colors[0][0],
+    //                                  colors[0][1],
+    //                                  colors[0][2]);
     while (1)
       ;
   }
   Serial.println("Robot initialized successfully");
 
-  led.DeviceDriverSet_RBGLED_Color(NUM_LEDS,
-                                   colors[2][0],
-                                   colors[2][1],
-                                   colors[2][2]);
-
-  robot.moveToWall(20, 180);
-  robot.stop();
-}
-
-// autonomous LED pattern (ignores serial input)
-void controlLED()
-{
-  unsigned long now = millis();
-
-  if (now - lastChange >= 500)
-  {
-    lastChange = now;
-    led.DeviceDriverSet_RBGLED_Color(NUM_LEDS,
-                                     colors[idx][0],
-                                     colors[idx][1],
-                                     colors[idx][2]);
-    idx = (idx + 1) % numColors;
-  }
+  // robot.moveToWall(20, 180);
+  // robot.stop();
+  led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Blue);
+  delay(1000);
+  led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
 }
 
 void loop()
 {
-  controlLED();
+  robot.update();
+
+  // Serial.println(robot.getDistance());
+  //  controlLED();
 
   // Example usage:
   // Move forward until reaching 20cm from wall
