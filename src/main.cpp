@@ -29,35 +29,28 @@ void setup()
 
 void loop()
 {
-  imu.update(); // reads raw + DMP FIFO if interrupt fired
-                // imu.printData(); // prints whatever OUTPUT_* flags are enabled
+  // imu.update(); // reads raw + DMP FIFO if interrupt fired
+  //               // imu.printData(); // prints whatever OUTPUT_* flags are enabled
 
-  float pitch = imu.getFilteredPitch();
-  float roll = imu.getFilteredRoll();
-  float yaw = imu.getFilteredYaw();
+  // float pitch = imu.getFilteredPitch();
+  // float roll = imu.getFilteredRoll();
+  // float yaw = imu.getFilteredYaw();
 
-  Serial.print("yaw:");
-  Serial.print(yaw);
-  Serial.print(",pitch:");
-  Serial.print(pitch);
-  Serial.print(",roll:");
-  Serial.println(roll);
+  // Serial.print("yaw:");
+  // Serial.print(yaw);
+  // Serial.print(",pitch:");
+  // Serial.print(pitch);
+  // Serial.print(",roll:");
+  // Serial.println(roll);
 
-  // Or access data directly:
-  // imu.raw().ax, imu.raw().gy, etc.
-  // imu.orientation().yaw, .pitch, .roll, etc.
-
-  // if (millis() - lastDistPrint >= DIST_PRINT_INTERVAL)
-  // {
-  //   lastDistPrint = millis();
-  //   float distCm = ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
-  //   float distMm = ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceMm();
-  //   Serial.print("Ultrasonic distance: ");
-  //   Serial.print(distCm, 2);
-  //   Serial.print(" cm  /  ");
-  //   Serial.print(distMm, 1);
-  //   Serial.println(" mm");
-  // }
+  if (millis() - lastDistPrint >= DIST_PRINT_INTERVAL)
+  {
+    lastDistPrint = millis();
+    uint16_t distCm = ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
+    Serial.print("Ultrasonic distance: ");
+    Serial.print(distCm);
+    Serial.println(" cm");
+  }
 }
 
 // #include "DeviceDriverSet_xxx0.h"
