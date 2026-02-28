@@ -2,9 +2,8 @@
 
 #include "Robot.h"
 
-Robot robot;
-
 bool MANUAL_MODE = false;
+Robot robot(MANUAL_MODE);
 
 void setup()
 {
@@ -22,7 +21,7 @@ void setup()
 
   for (int i = 0; i < 10; i++)
   {
-    robot.update(MANUAL_MODE);
+    robot.update();
     Serial.println(robot.getDistance());
   }
 
@@ -32,7 +31,7 @@ void setup()
 
   robot.moveToWall(20, 180);
   robot.turnToAngle(-90, 5.0, true);
-  robot.update(MANUAL_MODE);
+  robot.update();
 
   delay(3000);
 
@@ -43,7 +42,7 @@ void setup()
 
 void loop()
 {
-  robot.update(MANUAL_MODE);
+  robot.update();
 
   Serial.println("----");
   Serial.println(robot.getRow());

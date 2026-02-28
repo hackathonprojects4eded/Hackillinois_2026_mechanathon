@@ -20,6 +20,9 @@ private:
     SimpleKalmanFilter ultrasonicFilter; // Kalman filter for ultrasonic distance
     uint16_t _lastFilteredDistance;      // Store last filtered distance value
 
+    // Manual mode reference
+    bool &_manualMode;
+
     // Movement state
     bool _isMoving;
     uint16_t _targetDistance;
@@ -47,7 +50,7 @@ private:
 public:
     // DeviceDriverSet_passiveBuzzer buzzer; // added buzzer for audio cues
     // DeviceDriverSet_RBGLED led;
-    Robot();
+    Robot(bool &manualMode);
 
     // Initialize robot components
     bool begin();
@@ -56,19 +59,19 @@ public:
     // Automatically stops when distance <= distanceToWall.
     // Applies heading correction using yaw to maintain straight movement.
     // baseSpeed: starting PWM speed (0-255, recommended 150-200)
-    void moveToWall(uint16_t distanceToWall, uint8_t baseSpeed = 180, bool manual = false);
+    void moveToWall(uint16_t distanceToWall, uint8_t baseSpeed = 180);
 
     // Turn to face a target angle using yaw.
     // targetAngle: -90 (left), 90 (right), or custom angle
     // angleOffset: tolerance range for target angle (default ±5 degrees)
     // bothWheels: if true, both wheels rotate; if false, only outer wheel rotates
-    void turnToAngle(float targetAngle, float angleOffset = 5.0f, bool bothWheels = true, bool manual = false);
+    void turnToAngle(float targetAngle, float angleOffset = 5.0f, bool bothWheels = true);
 
     // Stop all motors
     void stop();
 
     // Update IMU and sensor data (call this in main loop if needed)
-    void update(bool manual);
+    void update();
 
     // Set head orientation (false = normal, true = reversed 180 degrees)
     // When true, forwards/backwards are reversed and angles are inverted

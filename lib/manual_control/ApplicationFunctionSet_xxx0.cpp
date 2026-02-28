@@ -256,8 +256,10 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
       case 6: /*<命令：N 6>*/
         break;
       case 7: /*<命令：N 7>*/
+        MANUAL_MODE = true;
         break;
       case 8: /*<命令：N 8>*/
+        MANUAL_MODE = true;
         break;
       case 9: /*<命令：N 9>*/
         break;
@@ -275,7 +277,7 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
         break;
       case 100:                                                                      /*<命令：N 100>*/
         Application_OwlBotxxx0.Functional_Mode = CMD_ClearAllFunctions_Standby_mode; /*清除功能：进入空闲模式*/
-        MANUAL_MODE = true;
+
         break;
       case 101: /*<命令：N 101>*/
 

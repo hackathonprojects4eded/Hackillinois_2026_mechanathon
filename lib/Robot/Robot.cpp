@@ -1,7 +1,7 @@
 #include "Robot.h"
 
-Robot::Robot()
-    : _isMoving(false), _targetDistance(0), _moveBaseSpeed(180),
+Robot::Robot(bool &manualMode)
+    : _manualMode(manualMode), _isMoving(false), _targetDistance(0), _moveBaseSpeed(180),
       _isTurning(false), _targetTurnAngle(0), _turnAngleOffset(5.0f), _turnBothWheels(true),
       _lastFilteredDistance(69), _headReversed(true),
       ultrasonicFilter(2.0f, 5.0f, 2.0f) // mea_e=2cm, est_e=5cm, q=2cm (process noise)
@@ -32,10 +32,10 @@ bool Robot::begin()
     return true;
 }
 
-void Robot::update(bool manual)
+void Robot::update()
 {
     Application_FunctionSet.ApplicationFunctionSet_SerialPortDataAnalysis();
-    if (!manual)
+    if (!_manualMode)
     {
         uint16_t rawDist = ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
         delay(20);
@@ -64,9 +64,9 @@ void Robot::update(bool manual)
     }
 }
 
-void Robot::moveToWall(uint16_t distanceToWall, uint8_t baseSpeed, bool manual)
+void Robot::moveToWall(uint16_t distanceToWall, uint8_t baseSpeed)
 {
-    if (manual)
+    if (_manualMode)
         return;
     // Validate parameters
     if (distanceToWall >= 40)
@@ -80,7 +80,7 @@ void Robot::moveToWall(uint16_t distanceToWall, uint8_t baseSpeed, bool manual)
     _isMoving = true;
     while (_isMoving)
     {
-        update(manual);
+        update();
         uint16_t currentDist = _lastFilteredDistance;
 
         Serial.println(currentDist);
@@ -120,9 +120,9 @@ void Robot::moveToWall(uint16_t distanceToWall, uint8_t baseSpeed, bool manual)
     }
 }
 
-void Robot::turnToAngle(float targetAngle, float angleOffset, bool bothWheels, bool manual)
+void Robot::turnToAngle(float targetAngle, float angleOffset, bool bothWheels)
 {
-    if (manual)
+    if (_manualMode)
         return;
     float adjustedTargetAngle = _reverseAngle(targetAngle);
     robotTargetYaw = _reverseAngle(targetAngle);
