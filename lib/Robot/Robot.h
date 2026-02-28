@@ -12,9 +12,9 @@ private:
     MPU6050Wrapper imu;
     DeviceDriverSet_ULTRASONIC ultrasonic;
     DeviceDriverSet_Motor motor;
-    DeviceDriverSet_passiveBuzzer buzzer;   // added buzzer for audio cues
-    SimpleKalmanFilter ultrasonicFilter; // Kalman filter for ultrasonic distance
-    uint16_t _lastFilteredDistance;      // Store last filtered distance value
+    DeviceDriverSet_passiveBuzzer buzzer; // added buzzer for audio cues
+    SimpleKalmanFilter ultrasonicFilter;  // Kalman filter for ultrasonic distance
+    uint16_t _lastFilteredDistance;       // Store last filtered distance value
 
     // Movement state
     bool _isMoving;
@@ -27,10 +27,15 @@ private:
     float _turnAngleOffset;
     bool _turnBothWheels;
 
+    // Head orientation
+    bool _headReversed; // If true, reverses all forward/backward directions and inverts angles
+
     // Helper functions
     float _normalizeAngle(float angle);
     bool _isAtTargetAngle(float currentYaw, float targetYaw, float offset);
     void _applyHeadingCorrection(uint8_t &speedA, uint8_t &speedB, float yaw);
+    bool _reverseDirection(bool direction); // Reverse a direction if head is reversed
+    float _reverseAngle(float angle);       // Reverse an angle if head is reversed
 
 public:
     Robot();
@@ -56,7 +61,13 @@ public:
     // Update IMU and sensor data (call this in main loop if needed)
     void update();
 
+    // Set head orientation (false = normal, true = reversed 180 degrees)
+    // When true, forwards/backwards are reversed and angles are inverted
+    void setHeadReversed(bool reversed) { _headReversed = reversed; }
+
     // Accessors
     float getYaw() const { return imu.getFilteredYaw(); }
+    float getPitch() const { return imu.getFilteredPitch(); }
+    float getRow() const { return imu.getFilteredRoll(); }
     uint16_t getDistance() const { return _lastFilteredDistance; }
 };

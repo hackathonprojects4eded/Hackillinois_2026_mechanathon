@@ -11,23 +11,16 @@ DeviceDriverSet_passiveBuzzer buzzer;
 
 void setup()
 {
+  Serial.begin(115200);
+
   buzzer.DeviceDriverSet_passiveBuzzer_Init();
   buzzer.DeviceDriverSet_passiveBuzzer_Scale_c8(100);
 
-  Serial.begin(115200);
-  // while (!Serial)
-  //   ;
-
-  // initialize LEDs for app control
   led.DeviceDriverSet_RBGLED_Init(95);
 
   if (!robot.begin())
   {
     Serial.println("Failed to initialize robot");
-    // led.DeviceDriverSet_RBGLED_Color(NUM_LEDS,
-    //                                  colors[0][0],
-    //                                  colors[0][1],
-    //                                  colors[0][2]);
     while (1)
       ;
   }
@@ -44,30 +37,23 @@ void setup()
   led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
 
   robot.moveToWall(20, 180);
-  robot.turnToAngle(-90, 5.0, true);
-  robot.stop();
+  // robot.turnToAngle(-90, 2.0, true);
+  // robot.update();
+
+  // delay(3000);
+
+  // robot.moveToWall(20, 180);
+  // robot.turnToAngle(-180, 2.0, true);
+  // robot.stop();
 }
 
 void loop()
 {
-  robot.update();
+  // robot.update();
 
-  // Example usage:
-  // Move forward until reaching 20cm from wall
-  // robot.moveToWall(20, 180); // distance=20cm, baseSpeed=180/255
-
-  // // // Turn to face left (-90 degrees)
-  // robot.turnToAngle(-90, 5.0, true); // angle=-90, offset=5°, both wheels
-
-  // // // Move to wall again
-  // // robot.moveToWall(25, 180);
-
-  // // // Turn to face right (90 degrees) using only outer wheel
-  // // robot.turnToAngle(90, 5.0, false); // angle=90, offset=5°, single wheel
-
-  // // Stop and wait
-  // robot.stop();
-  // delay(2000);
+  // Serial.println("----");
+  // Serial.println(robot.getRow());
+  // Serial.println(robot.getPitch());
 }
 
 // #include "DeviceDriverSet_xxx0.h"
