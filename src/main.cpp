@@ -1,18 +1,18 @@
 #include <Arduino.h>
 
+#include "ApplicationFunctionSet_xxx0.h"
 // put function declarations here:
-int myFunction(int, int);
 
-void setup() {
+ApplicationFunctionSet Application_FunctionSet;
+
+void setup()
+{
   // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  Application_FunctionSet.ApplicationFunctionSet_Init();
 }
 
-void loop() {
+void loop()
+{
   // put your main code here, to run repeatedly:
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  Application_FunctionSet.Test();
 }
