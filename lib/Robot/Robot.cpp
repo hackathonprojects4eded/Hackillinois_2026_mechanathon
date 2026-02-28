@@ -21,8 +21,8 @@ bool Robot::begin()
 
     motor.DeviceDriverSet_Motor_Init();
     ultrasonic.DeviceDriverSet_ULTRASONIC_Init();
-    buzzer.DeviceDriverSet_passiveBuzzer_Init();
-    led.DeviceDriverSet_RBGLED_Init(95);
+    // buzzer.DeviceDriverSet_passiveBuzzer_Init();
+    // led.DeviceDriverSet_RBGLED_Init(95);
     bool ret = imu.begin();
     if (!ret)
     {
@@ -240,18 +240,12 @@ void Robot::_applyHeadingCorrection(uint8_t &speedA, uint8_t &speedB, float yaw)
             // Tilted left, speed up right motor (B)
             speedA = max((uint8_t)(speedA - correction), MIN_SPEED);
             speedB = min((uint8_t)(speedB + correction), 255);
-            led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Blue);
-            delay(1000);
-            led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
         }
         else
         {
             // Tilted right, speed up left motor (A)
             speedA = min((uint8_t)(speedA + correction), 255);
             speedB = max((uint8_t)(speedB - correction), MIN_SPEED);
-            led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Red);
-            delay(1000);
-            led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
         }
     }
 }

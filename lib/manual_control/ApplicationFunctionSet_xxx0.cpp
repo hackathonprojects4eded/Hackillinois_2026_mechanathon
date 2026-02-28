@@ -243,37 +243,7 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
       // 3#解析并更新控制命令的信号量值
       switch (control_mode_N) /*以下代码块请结合小车通讯协议V.docx 查看*/
       {
-      case 1: /*<命令：N 1> */
-        break;
-      case 2: /*<命令：N 2>*/
-        break;
-      case 3: /*<命令：N 3>*/
-        break;
-      case 4: /*<命令：N 4>*/
-        break;
-      case 5: /*<命令：N 5>*/
-        break;
-      case 6: /*<命令：N 6>*/
 
-        break;
-      case 7: /*<命令：N 7>*/
-        break;
-      case 8: /*<命令：N 8>*/
-        break;
-      case 9: /*<命令：N 9>*/
-        break;
-      case 10: /*<命令：N 10>*/
-        break;
-      case 21: /*<命令：N 21>*/
-        break;
-      case 22: /*<命令：N 22>*/
-        break;
-      case 23: /*<命令：N 23>*/
-        break;
-      case 103: /*<命令：N 103>*/
-        break;
-      case 110: /*<命令：N 110>*/
-        break;
       case 100:                                                                      /*<命令：N 100>*/
         Application_OwlBotxxx0.Functional_Mode = CMD_ClearAllFunctions_Standby_mode; /*清除功能：进入空闲模式*/
         MANUAL_MODE = true;

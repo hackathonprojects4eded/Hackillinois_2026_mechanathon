@@ -4,9 +4,7 @@
 #include "Ultrasonic_control.h"
 #include "motor_control.h"
 #include "SimpleKalmanFilter.h"
-#include "Buzzer_control.h"
 #include <Adafruit_SoftServo.h>
-#include "LED_control.h"
 #include "ApplicationFunctionSet_xxx0.h"
 
 class Robot
@@ -47,8 +45,8 @@ private:
     float _reverseAngle(float angle);       // Reverse an angle if head is reversed
 
 public:
-    DeviceDriverSet_passiveBuzzer buzzer; // added buzzer for audio cues
-    DeviceDriverSet_RBGLED led;
+    // DeviceDriverSet_passiveBuzzer buzzer; // added buzzer for audio cues
+    // DeviceDriverSet_RBGLED led;
     Robot();
 
     // Initialize robot components

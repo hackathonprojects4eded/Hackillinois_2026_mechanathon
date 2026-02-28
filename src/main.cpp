@@ -18,7 +18,7 @@ void setup()
   }
   Serial.println("Robot initialized successfully");
 
-  robot.buzzer.DeviceDriverSet_passiveBuzzer_Scale_c8(100);
+  // robot.buzzer.DeviceDriverSet_passiveBuzzer_Scale_c8(100);
 
   for (int i = 0; i < 10; i++)
   {
@@ -26,9 +26,9 @@ void setup()
     Serial.println(robot.getDistance());
   }
 
-  robot.led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Blue);
-  delay(1000);
-  robot.led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
+  // robot.led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Blue);
+  // delay(1000);
+  // robot.led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
 
   robot.moveToWall(20, 180);
   robot.turnToAngle(-90, 5.0, true);
