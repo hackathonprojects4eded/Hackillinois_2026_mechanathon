@@ -2,12 +2,15 @@
 
 #include "Robot.h"
 
+#include "MPU6050Wrapper.h"
+
 // Global Robot instance
 Robot robot;
+MPU6050Wrapper imu;
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   // Initialize robot (motors and IR sensors)
   robot.init();
@@ -25,68 +28,16 @@ void setup()
   {
     robot.move(Robot::FORWARD, 200); // Follow line
   }
-
-  // Initialize MPU6050 sensor
-  // uint8_t mpu_status = mpu6050_basic_init(MPU6050_ADDRESS_AD0_LOW);
-  // if (mpu_status != 0)
-  // {
-  //   Serial.println("MPU6050 init failed!");
-  //   while (1)
-  //     ; // Halt if MPU6050 fails
-  // }
-
-  // Serial.println("Robot and sensors initialized!");
-  // delay(500);
 }
 
 void loop()
 {
-  // Read MPU6050 data
-  // float accel[3]; // acceleration in g (gravity)
-  // float gyro[3];  // angular velocity in dps (degrees per second)
-  // float temp;     // temperature in Celsius
+  imu.update();    // reads raw + DMP FIFO if interrupt fired
+  imu.printData(); // prints whatever OUTPUT_* flags are enabled
 
-  // // Read accelerometer and gyroscope
-  // if (mpu6050_basic_read(accel, gyro) == 0)
-  // {
-  //   Serial.print("Accel X: ");
-  //   Serial.print(accel[0], 2);
-  //   Serial.print("g | Y: ");
-  //   Serial.print(accel[1], 2);
-  //   Serial.print("g | Z: ");
-  //   Serial.print(accel[2], 2);
-  //   Serial.println("g");
-
-  //   Serial.print("Gyro X: ");
-  //   Serial.print(gyro[0], 2);
-  //   Serial.print("dps | Y: ");
-  //   Serial.print(gyro[1], 2);
-  //   Serial.print("dps | Z: ");
-  //   Serial.print(gyro[2], 2);
-  //   Serial.println("dps");
-  // }
-
-  // // Read temperature
-  // if (mpu6050_basic_read_temperature(&temp) == 0)
-  // {
-  //   Serial.print("Temperature: ");
-  //   Serial.print(temp, 1);
-  //   Serial.println("C");
-  // }
-
-  // // IR sensor readings
-  // uint16_t ir_left, ir_middle, ir_right;
-  // robot.getIRSensorValues(ir_left, ir_middle, ir_right);
-
-  // Serial.print("IR - Left: ");
-  // Serial.print(ir_left);
-  // Serial.print(" | Middle: ");
-  // Serial.print(ir_middle);
-  // Serial.print(" | Right: ");
-  // Serial.println(ir_right);
-
-  // Serial.println("---");
-  // delay(500); // Read every 500ms
+  // Or access data directly:
+  // imu.raw().ax, imu.raw().gy, etc.
+  // imu.orientation().yaw, .pitch, .roll, etc.
 }
 
 // #include "DeviceDriverSet_xxx0.h"
