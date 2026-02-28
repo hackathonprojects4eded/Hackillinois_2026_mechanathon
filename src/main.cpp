@@ -1,15 +1,20 @@
 #include <Arduino.h>
 
 #include "Robot.h"
+#include "LED_control.h"
 
 // Global Robot instance
 Robot robot;
+DeviceDriverSet_RBGLED led;
 
 void setup()
 {
   Serial.begin(115200);
   while (!Serial)
     ;
+
+  // initialize LEDs for app control
+  led.DeviceDriverSet_RBGLED_Init(100);
 
   if (!robot.begin())
   {
@@ -20,24 +25,51 @@ void setup()
   Serial.println("Robot initialized successfully");
 }
 
-void loop()
+// autonomous LED pattern (ignores serial input)
+void controlLED()
 {
-  // Example usage:
-  // Move forward until reaching 20cm from wall
-  robot.moveToWall(20, 180); // distance=20cm, baseSpeed=180/255
+  // cycle through some colors every 500ms
+  static unsigned long lastChange = 0;
+  static uint8_t idx = 0;
+  const uint8_t numColors = 6;
+  const uint8_t colors[numColors][3] = {
+    {255, 0, 0},   // red
+    {0, 255, 0},   // green
+    {0, 0, 255},   // blue
+    {255, 165, 0}, // orange
+    {255, 255, 0}, // yellow
+    {255, 255, 255} // white
+  };
 
-  // Turn to face left (-90 degrees)
-  robot.turnToAngle(-90, 5.0, true); // angle=-90, offset=5°, both wheels
+  unsigned long now = millis();
+  if (now - lastChange >= 500) {
+    lastChange = now;
+    led.DeviceDriverSet_RBGLED_Color(NUM_LEDS,
+                                     colors[idx][0],
+                                     colors[idx][1],
+                                     colors[idx][2]);
+    idx = (idx + 1) % numColors;
+  }
+}
 
-  // Move to wall again
-  robot.moveToWall(25, 180);
+void loop()
+{  
+  controlLED();
+  // // Move forward until reaching 20cm from wall
+  // robot.moveToWall(20, 180); // distance=20cm, baseSpeed=180/255
 
-  // Turn to face right (90 degrees) using only outer wheel
-  robot.turnToAngle(90, 5.0, false); // angle=90, offset=5°, single wheel
+  // // Turn to face left (-90 degrees)
+  // robot.turnToAngle(-90, 5.0, true); // angle=-90, offset=5°, both wheels
 
-  // Stop and wait
-  robot.stop();
-  delay(2000);
+  // // Move to wall again
+  // robot.moveToWall(25, 180);
+
+  // // Turn to face right (90 degrees) using only outer wheel
+  // robot.turnToAngle(90, 5.0, false); // angle=90, offset=5°, single wheel
+
+  // // Stop and wait
+  // robot.stop();
+  // delay(2000);
 }
 
 // #include "DeviceDriverSet_xxx0.h"
