@@ -3,18 +3,18 @@
 /*ULTRASONIC*/
 void DeviceDriverSet_ULTRASONIC::DeviceDriverSet_ULTRASONIC_Init(void)
 {
-  Wire.begin();
+  // Wire.begin();
 }
 
 void DeviceDriverSet_ULTRASONIC::DeviceDriverSet_ULTRASONIC_Get(uint16_t *ULTRASONIC_Get /*out*/)
 {
   unsigned dat[2] = {0};
-  Wire.requestFrom(0x07, 1); //从器件读取一位数
+  Wire.requestFrom(0x07, 1); // 从器件读取一位数
   if (Wire.available() > 0)
   {
     dat[0] = Wire.read();
   }
-  Wire.requestFrom(0x07, 1); //从器件读取一位数
+  Wire.requestFrom(0x07, 1); // 从器件读取一位数
   if (Wire.available() > 0)
   {
     dat[1] = Wire.read();
@@ -60,13 +60,13 @@ float DeviceDriverSet_ULTRASONIC::DeviceDriverSet_ULTRASONIC_GetDistanceMm(void)
 void DeviceDriverSet_ULTRASONIC::DeviceDriverSet_ULTRASONIC_Test(void)
 {
   unsigned dat[2] = {0};
-  Wire.requestFrom(0x07, 1); //从器件读取一位数
+  Wire.requestFrom(0x07, 1); // 从器件读取一位数
   if (Wire.available() > 0)
   {
     dat[0] = Wire.read();
   }
 
-  Wire.requestFrom(0x07, 1); //从器件读取一位数
+  Wire.requestFrom(0x07, 1); // 从器件读取一位数
   if (Wire.available() > 0)
   {
     dat[1] = Wire.read();

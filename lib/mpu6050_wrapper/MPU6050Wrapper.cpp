@@ -88,15 +88,10 @@ bool MPU6050Wrapper::begin(bool calibrate)
 // ── update() ──────────────────────────────────────────────────────────────────
 void MPU6050Wrapper::update()
 {
-    // Always grab raw register data
     _updateRaw();
-
-    // Only attempt DMP read when the interrupt has fired
-    if (!_dmpReady || !_mpuInterrupt)
+    if (!_dmpReady)
         return;
-    _mpuInterrupt = false;
-
-    _updateDMP();
+    _updateDMP(); // always attempt, dmpGetCurrentFIFOPacket returns false if nothing ready
 }
 
 // ── _updateRaw() ──────────────────────────────────────────────────────────────
