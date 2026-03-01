@@ -11,11 +11,9 @@ void setup()
 
   if (!robot.begin())
   {
-    Serial.println("Failed to initialize robot");
     while (1)
       ;
   }
-  Serial.println("Robot initialized successfully");
 
   // robot.buzzer.DeviceDriverSet_passiveBuzzer_Scale_c8(100);
 

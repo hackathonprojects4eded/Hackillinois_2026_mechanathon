@@ -99,7 +99,7 @@ $ Shenzhen, China:Elegoo & HOU Changhua & 2019-09
 */
 
 // produce intermittent beeps while actually turning left or right
-  // maintain static timer across calls 
+// maintain static timer across calls
 
 static void ApplicationFunctionSet_OwlBotMotionControl(OwlBotMotionControl direction, uint8_t speed)
 {
@@ -108,7 +108,8 @@ static void ApplicationFunctionSet_OwlBotMotionControl(OwlBotMotionControl direc
   {
   case /* constant-expression */ Left:
     /* code */
-    if (millis() - lastBuzzTime >= 500) {
+    if (millis() - lastBuzzTime >= 500)
+    {
       lastBuzzTime = millis();
       buzzer.DeviceDriverSet_passiveBuzzer_controlMonosyllabic(0, 100);
     }
@@ -311,28 +312,28 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
           break;
         case 3:
           //  Application_OwlBotxxx0.Motion_Control = Left;
-          Application_OwlBotxxx0.Motion_Control = Right;
+          Application_OwlBotxxx0.Motion_Control = Left;
           break;
         case 4:
           // Application_OwlBotxxx0.Motion_Control = Right;
-          Application_OwlBotxxx0.Motion_Control = Left;
+          Application_OwlBotxxx0.Motion_Control = Right;
           break;
-        case 5:
-          // Application_OwlBotxxx0.Motion_Control = LeftForward;
-          Application_OwlBotxxx0.Motion_Control = RightBackward;
-          break;
-        case 6:
-          // Application_OwlBotxxx0.Motion_Control = LeftBackward;
-          Application_OwlBotxxx0.Motion_Control = RightForward;
-          break;
-        case 7:
-          // Application_OwlBotxxx0.Motion_Control = RightForward;
-          Application_OwlBotxxx0.Motion_Control = LeftBackward;
-          break;
-        case 8:
-          // Application_OwlBotxxx0.Motion_Control = RightBackward;
-          Application_OwlBotxxx0.Motion_Control = LeftForward;
-          break;
+        // case 5:
+        //   // Application_OwlBotxxx0.Motion_Control = LeftForward;
+        //   Application_OwlBotxxx0.Motion_Control = RightBackward;
+        //   break;
+        // case 6:
+        //   // Application_OwlBotxxx0.Motion_Control = LeftBackward;
+        //   Application_OwlBotxxx0.Motion_Control = RightForward;
+        //   break;
+        // case 7:
+        //   // Application_OwlBotxxx0.Motion_Control = RightForward;
+        //   Application_OwlBotxxx0.Motion_Control = LeftBackward;
+        //   break;
+        // case 8:
+        //   // Application_OwlBotxxx0.Motion_Control = RightBackward;
+        //   Application_OwlBotxxx0.Motion_Control = LeftForward;
+        //   break;
         case 9:
           Application_OwlBotxxx0.Motion_Control = stop_it;
           break;
