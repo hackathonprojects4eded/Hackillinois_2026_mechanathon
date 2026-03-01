@@ -17,6 +17,7 @@ bool Robot::begin()
 
     servo.attach(3);
     servo.write(90);
+    servo.refresh();
 
     motor.DeviceDriverSet_Motor_Init();
     ultrasonic.DeviceDriverSet_ULTRASONIC_Init();
@@ -136,7 +137,7 @@ void Robot::turnToAngle(float targetAngle, float angleOffset, bool bothWheels)
 
     _targetTurnAngle = _normalizeAngle(_targetTurnAngle);
 
-    uint8_t SPEED = 200;
+    uint8_t SPEED = 255;
 
     while (_isTurning)
     {
@@ -178,11 +179,11 @@ void Robot::turnToAngle(float targetAngle, float angleOffset, bool bothWheels)
         {
             if (angleDiff > 0)
             {
-                motor.DeviceDriverSet_Motor_control(direction_just, SPEED, direction_just, 0, true);
+                motor.DeviceDriverSet_Motor_control(direction_back, SPEED, direction_back, 0, true);
             }
             else
             {
-                motor.DeviceDriverSet_Motor_control(direction_just, 0, direction_just, SPEED, true);
+                motor.DeviceDriverSet_Motor_control(direction_back, 0, direction_back, SPEED, true);
             }
         }
 

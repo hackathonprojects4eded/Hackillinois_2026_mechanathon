@@ -25,33 +25,17 @@ void setup()
     Serial.println(robot.getDistance());
   }
 
-  robot.servo.write(90);
-  robot.servo.refresh();
-  // robot.servo.write(45);
-  // robot.servo.refresh();
-  // delay(1000);
-  // robot.servo.write(90);
-  // robot.servo.refresh();
-  // delay(1000);
-  // robot.servo.write(135);
-  // robot.servo.refresh();
-  // delay(1000);
-  // robot.servo.write(180);
-  // robot.servo.refresh();
-  // delay(1000);
-  // robot.led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Blue);
-  // delay(1000);
-  // robot.led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
+  robot.led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Cornsilk);
+  delay(1000);
+  robot.led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
 
-  // robot.moveToWall(20, 180);
-  // robot.turnToAngle(-90, 5.0, true);
-  // robot.update();
+  robot.moveToWall(39, 180);
+  robot.turnToAngle(-90, 3.0, false);
+  robot.update();
 
-  // delay(3000);
-
-  // robot.moveToWall(20, 180);
-  // robot.turnToAngle(-180, 5.0, true);
-  // robot.stop();
+  robot.moveToWall(39, 180);
+  robot.turnToAngle(-180, 3.0, false);
+  robot.stop();
 }
 
 void loop()
@@ -60,25 +44,20 @@ void loop()
   // Serial.println(robot.getRow());
 
   // float roll = robot.getRow(); // this is actually pitch
-  // float pitch = -roll;         // fix sensor frame
+  // float pitch = roll;          // fix sensor frame
 
   // const float centerAngle = 90.0; // servo mechanical center
-  // const float gain = 1.0;         // tune this
+  // const float gain = 5.0;         // tune this
 
   // float servoAngle = centerAngle + gain * pitch;
 
   // // constrain to left-half-circle limits
   // servoAngle = constrain(servoAngle, 0, 180);
 
+  // Serial.println(servoAngle);
+
   // robot.servo.write(servoAngle);
-  // robot.servo.refresh(); // if using software servo
-
-  // robot.servo.write(robot.getRow());
   // robot.servo.refresh();
-
-  // Serial.println("----");
-  // Serial.println(robot.getRow()); //thjis one matters (and up is negative cuz its flipped rip)
-  // Serial.println(robot.getPitch());
 }
 
 // #include "DeviceDriverSet_xxx0.h"
