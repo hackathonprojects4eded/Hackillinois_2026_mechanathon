@@ -6,25 +6,31 @@
  * @LastEditTime: 2019-10-15 10:32:19
  * @LastEditors: Please set LastEditors
  */
+#pragma once
+
 #include <HardwareSerial.h>
 #include <stdio.h>
 #include <string.h>
 #include "ApplicationFunctionSet_xxx0.h"
-#include "motor_control.h"
+#include "DeviceDriverSet_xxx0.h"
 
 #include "ArduinoJson-v6.11.1.h" //ArduinoJson
-#include <SoftwareSerial.h>
 
 #define _is_print 1
+#define _Test_print 1 // When testing, remember to set 0 after using the test to save controller resources and load.
 
 /*硬件设备成员对象序列*/
+extern bool MANUAL_MODE;
 DeviceDriverSet_Motor AppMotor;
 
-// Bluetooth instance (RX=10, TX=11)
-SoftwareSerial BTSerial(10, 11);
-
-#define OBSTACLE_DISTANCE_CM 20 // Obstacle detected if closer than 20cm
-extern bool MANUAL_MODE;
+/*f(x) int */
+static boolean function_xxx(long x, long s, long e) // f(x)
+{
+  if (s <= x && x <= e)
+    return true;
+  else
+    return false;
+}
 
 /*Motion direction control sequence*/
 enum OwlBotMotionControl
@@ -74,9 +80,8 @@ Application_xxx Application_OwlBotxxx0;
 
 void ApplicationFunctionSet::ApplicationFunctionSet_Init(void)
 {
-
-  BTSerial.begin(9600);
-  delay(50);
+  // Serial.begin(9600);
+  AppMotor.DeviceDriverSet_Motor_Init();
 }
 
 /*
@@ -208,21 +213,31 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
     SerialPortData += char(Serial.read());
     _delay(6); /*Necessary delay to prevent data loss*/
   }
+
+  // if ((SerialPortData.length() > 0))
+  // {
+  //   MANUAL_MODE = true;
+  // }
   if ((SerialPortData.length() > 0) && (SerialPortData != "") && (true == SerialPortData.endsWith("}")))
   {
-
+#if _Test_print
+    Serial.println(SerialPortData);
+#endif
     // 2#导入JsonDocument
     StaticJsonDocument<200> doc;                                       // 声明一个JsonDocument对象
     DeserializationError error = deserializeJson(doc, SerialPortData); // 反序列化JSON数据
     if (!error)                                                        // 检查反序列化是否成功
     {
       int control_mode_N = doc["N"];
+#if _Test_print
       Serial.println(control_mode_N);
+#endif
       char buf[3];
       uint8_t temp = doc["H"];
       sprintf(buf, "%d", temp);
       CommandSerialNumber = buf; // 获取新命令的序号
-      // 3#解析并更新控制命令的信号量值
+                                 // 3#解析并更新控制命令的信号量值
+
       switch (control_mode_N) /*以下代码块请结合小车通讯协议V.docx 查看*/
       {
       case 1: /*<命令：N 1> */
@@ -238,12 +253,11 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
       case 6: /*<命令：N 6>*/
         break;
       case 7: /*<命令：N 7>*/
-        MANUAL_MODE = true;
-        Serial.println("Recived manual mode request");
+        // MANUAL_MODE = true;
+
         break;
       case 8: /*<命令：N 8>*/
-        MANUAL_MODE = true;
-        Serial.println("Recived manual mode request");
+
         break;
       case 9: /*<命令：N 9>*/
         break;
@@ -268,6 +282,8 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
       case 104: /*<命令：N 104>*/
         break;
       case 105: /*<命令：N 105>*/
+        MANUAL_MODE = true;
+        Serial.println("hi");
         break;
       case 102: /*<命令：N 102> :摇杆控制命令*/
         Application_OwlBotxxx0.Functional_Mode = Rocker_mode;
@@ -303,17 +319,16 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
           break;
         default:
           Application_OwlBotxxx0.Motion_Control = stop_it;
+
           break;
         }
+#if _is_print
+// Serial.print('{' + CommandSerialNumber + "_ok}");
+#endif
         break;
       default:
         break;
       }
     }
   }
-}
-
-void ApplicationFunctionSet::SetFunctionalMode(int mode)
-{
-  Application_OwlBotxxx0.Functional_Mode = (OwlBotFunctionalModel)mode;
 }

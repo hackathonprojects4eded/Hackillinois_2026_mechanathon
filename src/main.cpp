@@ -7,7 +7,7 @@ Robot robot(MANUAL_MODE);
 
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   if (!robot.begin())
   {
@@ -25,6 +25,20 @@ void setup()
     Serial.println(robot.getDistance());
   }
 
+  robot.servo.write(90);
+  robot.servo.refresh();
+  // robot.servo.write(45);
+  // robot.servo.refresh();
+  // delay(1000);
+  // robot.servo.write(90);
+  // robot.servo.refresh();
+  // delay(1000);
+  // robot.servo.write(135);
+  // robot.servo.refresh();
+  // delay(1000);
+  // robot.servo.write(180);
+  // robot.servo.refresh();
+  // delay(1000);
   // robot.led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Blue);
   // delay(1000);
   // robot.led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
@@ -43,6 +57,24 @@ void setup()
 void loop()
 {
   robot.update();
+  // Serial.println(robot.getRow());
+
+  // float roll = robot.getRow(); // this is actually pitch
+  // float pitch = -roll;         // fix sensor frame
+
+  // const float centerAngle = 90.0; // servo mechanical center
+  // const float gain = 1.0;         // tune this
+
+  // float servoAngle = centerAngle + gain * pitch;
+
+  // // constrain to left-half-circle limits
+  // servoAngle = constrain(servoAngle, 0, 180);
+
+  // robot.servo.write(servoAngle);
+  // robot.servo.refresh(); // if using software servo
+
+  // robot.servo.write(robot.getRow());
+  // robot.servo.refresh();
 
   // Serial.println("----");
   // Serial.println(robot.getRow()); //thjis one matters (and up is negative cuz its flipped rip)
@@ -56,19 +88,14 @@ void loop()
 
 // void setup()
 // {
-//   // put your setup code here, to run once:
+//   // Serial.begin(115200);
 //   Application_FunctionSet.ApplicationFunctionSet_Init();
-
-//   // Enable obstacle avoidance mode (ObstacleAvoidance_mode = enum value 2)
-//   Application_FunctionSet.SetFunctionalMode(2);  // ObstacleAvoidance_mode
-//   Serial.println("Obstacle avoidance mode enabled!");
 // }
 
 // void loop()
 // {
 //   // put your main code here, to run repeatedly:
-// Application_FunctionSet.ApplicationFunctionSet_SerialPortDataAnalysis();
-// Application_FunctionSet.ApplicationFunctionSet_Rocker();
-// Application_FunctionSet.ApplicationFunctionSet_ObstacleAvoidance();  // Enable obstacle avoidance
-// Application_FunctionSet.CMD_ClearAllFunctionsXXX();
+//   Application_FunctionSet.ApplicationFunctionSet_SerialPortDataAnalysis();
+//   Application_FunctionSet.ApplicationFunctionSet_Rocker();
+//   Application_FunctionSet.CMD_ClearAllFunctionsXXX();
 // }

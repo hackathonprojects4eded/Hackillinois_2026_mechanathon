@@ -13,12 +13,10 @@ class Robot
 private:
     MPU6050Wrapper imu;
     DeviceDriverSet_ULTRASONIC ultrasonic;
-    DeviceDriverSet_Motor motor;
+
     ApplicationFunctionSet Application_FunctionSet;
 
-    Adafruit_SoftServo servo;
-
-    SimpleKalmanFilter ultrasonicFilter; // Kalman filter for ultrasonic distance
+        SimpleKalmanFilter ultrasonicFilter; // Kalman filter for ultrasonic distance
     uint16_t _lastFilteredDistance;      // Store last filtered distance value
 
     // Manual mode reference
@@ -51,6 +49,8 @@ private:
 public:
     // DeviceDriverSet_passiveBuzzer buzzer; // added buzzer for audio cues
     DeviceDriverSet_RBGLED led;
+    DeviceDriverSet_Motor motor;
+    Adafruit_SoftServo servo;
     Robot(bool &manualMode);
 
     // Initialize robot components

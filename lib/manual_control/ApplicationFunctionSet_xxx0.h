@@ -5,11 +5,11 @@
  * @LastEditTime: 2019-10-15 10:35:23
  * @LastEditors: Please set LastEditors
  */
-
+#pragma once
 #ifndef _ApplicationFunctionSet_xxx0_H_
 #define _ApplicationFunctionSet_xxx0_H_
 
-#include <Arduino.h>
+#include <arduino.h>
 
 class ApplicationFunctionSet
 {
@@ -17,8 +17,6 @@ public:
   void ApplicationFunctionSet_Init(void);
   void ApplicationFunctionSet_Rocker(void);
   void ApplicationFunctionSet_SerialPortDataAnalysis(void);
-  void ApplicationFunctionSet_ObstacleAvoidance(void);
-  void SetFunctionalMode(int mode);  // Mode setter for external control
 
   void CMD_ClearAllFunctionsXXX(void);
 

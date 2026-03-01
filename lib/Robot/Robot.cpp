@@ -13,11 +13,10 @@ bool Robot::begin()
     robotTargetYaw = 0;
 
     Application_FunctionSet.ApplicationFunctionSet_Init();
-    Application_FunctionSet.SetFunctionalMode(3); // Rocker_mode
+    Application_FunctionSet.CMD_ClearAllFunctionsXXX();
 
     servo.attach(3);
     servo.write(90);
-    servo.refresh();
 
     motor.DeviceDriverSet_Motor_Init();
     ultrasonic.DeviceDriverSet_ULTRASONIC_Init();
@@ -39,8 +38,6 @@ void Robot::update()
     if (!_manualMode)
     {
         led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Red);
-        delay(1000);
-        led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
         uint16_t rawDist = ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
         delay(20);
         rawDist += ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
@@ -64,8 +61,6 @@ void Robot::update()
     else
     {
         led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Blue);
-        delay(1000);
-        led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
         Application_FunctionSet.ApplicationFunctionSet_Rocker();
         Application_FunctionSet.CMD_ClearAllFunctionsXXX();
     }
