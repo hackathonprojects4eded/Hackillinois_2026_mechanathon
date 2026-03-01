@@ -15,12 +15,11 @@
 #include "ArduinoJson-v6.11.1.h" //ArduinoJson
 #include "Buzzer_control.h"
 #include <Adafruit_SoftServo.h>
+#include "LED_control.h"
 extern Adafruit_SoftServo servo;
-
+extern DeviceDriverSet_RBGLED led;
 #define _is_print 1
-#define _Test_print 0 // When testing, remember to set 0 after using the test to save controller resources and load.
-
-/*硬件设备成员对象序列*/
+#define _Test_print 0
 DeviceDriverSet_Motor AppMotor;
 extern DeviceDriverSet_passiveBuzzer buzzer;
 
@@ -61,6 +60,10 @@ static void ApplicationFunctionSet_OwlBotMotionControl(OwlBotMotionControl direc
     /* code */
     servo.write(180);
     servo.refresh();
+    buzzer.DeviceDriverSet_passiveBuzzer_controlMonosyllabic(0, 100);
+    led.DeviceDriverSet_RBGLED_xxx(0, 3, CRGB::Yellow);
+    delay(50);
+    led.DeviceDriverSet_RBGLED_xxx(0, 3, CRGB::Black);
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_just, /*speed_A*/ speed,
                                            /*direction_B*/ direction_back, /*speed_B*/ speed, /*controlED*/ control_enable); // Motor control
     break;
@@ -68,6 +71,10 @@ static void ApplicationFunctionSet_OwlBotMotionControl(OwlBotMotionControl direc
     /* code */
     servo.write(180);
     servo.refresh();
+    buzzer.DeviceDriverSet_passiveBuzzer_controlMonosyllabic(0, 100);
+    led.DeviceDriverSet_RBGLED_xxx(0, 4, CRGB::Yellow);
+    delay(50);
+    led.DeviceDriverSet_RBGLED_xxx(0, 1, CRGB::Black);
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_back, /*speed_A*/ speed,
                                            /*direction_B*/ direction_just, /*speed_B*/ speed, /*controlED*/ control_enable); // Motor control
     break;
@@ -75,6 +82,12 @@ static void ApplicationFunctionSet_OwlBotMotionControl(OwlBotMotionControl direc
     /* code */
     servo.write(180);
     servo.refresh();
+    buzzer.DeviceDriverSet_passiveBuzzer_controlMonosyllabic(0, 200);
+
+    led.DeviceDriverSet_RBGLED_xxx(0, 5, CRGB::Salmon);
+    delay(50);
+    led.DeviceDriverSet_RBGLED_xxx(0, 5, CRGB::Black);
+
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_just, /*speed_A*/ speed,
                                            /*direction_B*/ direction_just, /*speed_B*/ speed, /*controlED*/ control_enable); // Motor control
     break;

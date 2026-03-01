@@ -4,7 +4,6 @@
 #include "SimpleKalmanFilter.h"
 
 #include "ApplicationFunctionSet_xxx0.h"
-#include "LED_control.h"
 
 class Robot
 {
@@ -39,9 +38,7 @@ private:
     // float _reverseAngle(float angle);       // Reverse an angle if head is reversed
 
 public:
-    DeviceDriverSet_RBGLED led;
-
-    // DeviceDriverSet_Motor motor;
+       // DeviceDriverSet_Motor motor;
 
     Robot(bool &manualMode);
 

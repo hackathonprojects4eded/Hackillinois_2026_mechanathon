@@ -22,7 +22,7 @@ bool Robot::begin()
     Application_FunctionSet.CMD_ClearAllFunctionsXXX();
     // motor.DeviceDriverSet_Motor_Init();
     // ultrasonic.DeviceDriverSet_ULTRASONIC_Init();
-    led.DeviceDriverSet_RBGLED_Init(95);
+
     // bool ret = imu.begin();
     // if (!ret)
     // {
@@ -36,7 +36,6 @@ void Robot::update()
 {
     Application_FunctionSet.ApplicationFunctionSet_SerialPortDataAnalysis();
 
-    led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Blue);
     Application_FunctionSet.ApplicationFunctionSet_Rocker();
     Application_FunctionSet.CMD_ClearAllFunctionsXXX();
 

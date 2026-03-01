@@ -3,6 +3,7 @@
 #include "Robot.h"
 #include "Buzzer_control.h"
 #include <Adafruit_SoftServo.h>
+#include "LED_control.h"
 
 bool MANUAL_MODE = true;
 Robot robot(MANUAL_MODE);
@@ -10,6 +11,7 @@ Robot robot(MANUAL_MODE);
 DeviceDriverSet_passiveBuzzer buzzer;
 Adafruit_SoftServo servo;
 MPU6050Wrapper imu;
+DeviceDriverSet_RBGLED led;
 
 unsigned long lastPacketTime = 0;
 unsigned long WATCHDOG_TIMEOUT_MS = 250; // stop if no packet for 500ms
@@ -30,11 +32,13 @@ void setup()
     // Serial.println("failed to init imu");
   }
 
+  led.DeviceDriverSet_RBGLED_Init(95);
+
   buzzer.DeviceDriverSet_passiveBuzzer_Scale_c8(100);
 
-  robot.led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::DarkGreen);
+  led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::DarkGreen);
   delay(1000);
-  robot.led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
+  led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
 
   servo.attach(3);
   servo.write(90);
@@ -61,6 +65,7 @@ void loop()
   robot.update();
   servo.refresh();
   imu.update();
+  led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Blue);
 
   // Serial.print(F("quat:"));
   // Serial.print(robot.imu.getW());
