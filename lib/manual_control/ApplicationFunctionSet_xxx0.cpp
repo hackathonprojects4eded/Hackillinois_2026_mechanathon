@@ -63,7 +63,7 @@ static void ApplicationFunctionSet_OwlBotMotionControl(OwlBotMotionControl direc
     buzzer.DeviceDriverSet_passiveBuzzer_controlMonosyllabic(0, 100);
     led.DeviceDriverSet_RBGLED_xxx(0, 3, CRGB::Yellow);
     delay(50);
-    led.DeviceDriverSet_RBGLED_xxx(0, 3, CRGB::Black);
+
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_just, /*speed_A*/ speed,
                                            /*direction_B*/ direction_back, /*speed_B*/ speed, /*controlED*/ control_enable); // Motor control
     break;
@@ -72,9 +72,11 @@ static void ApplicationFunctionSet_OwlBotMotionControl(OwlBotMotionControl direc
     servo.write(180);
     servo.refresh();
     buzzer.DeviceDriverSet_passiveBuzzer_controlMonosyllabic(0, 100);
-    led.DeviceDriverSet_RBGLED_xxx(0, 4, CRGB::Yellow);
+    led.DeviceDriverSet_RBGLED_Color(0, 0, 255, 255);
+    led.DeviceDriverSet_RBGLED_Color(2, 0, 255, 255);
+    led.DeviceDriverSet_RBGLED_Color(4, 0, 255, 255);
     delay(50);
-    led.DeviceDriverSet_RBGLED_xxx(0, 1, CRGB::Black);
+
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_back, /*speed_A*/ speed,
                                            /*direction_B*/ direction_just, /*speed_B*/ speed, /*controlED*/ control_enable); // Motor control
     break;
@@ -86,7 +88,6 @@ static void ApplicationFunctionSet_OwlBotMotionControl(OwlBotMotionControl direc
 
     led.DeviceDriverSet_RBGLED_xxx(0, 5, CRGB::Salmon);
     delay(50);
-    led.DeviceDriverSet_RBGLED_xxx(0, 5, CRGB::Black);
 
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_just, /*speed_A*/ speed,
                                            /*direction_B*/ direction_just, /*speed_B*/ speed, /*controlED*/ control_enable); // Motor control
