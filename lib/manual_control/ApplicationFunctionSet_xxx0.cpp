@@ -72,9 +72,9 @@ static void ApplicationFunctionSet_OwlBotMotionControl(OwlBotMotionControl direc
     servo.write(180);
     servo.refresh();
     buzzer.DeviceDriverSet_passiveBuzzer_controlMonosyllabic(0, 100);
-    led.DeviceDriverSet_RBGLED_Color(0, 0, 255, 255);
-    led.DeviceDriverSet_RBGLED_Color(2, 0, 255, 255);
-    led.DeviceDriverSet_RBGLED_Color(4, 0, 255, 255);
+    led.DeviceDriverSet_RBGLED_Color(0, 255, 0, 255);
+    led.DeviceDriverSet_RBGLED_Color(2, 255, 0, 255);
+    led.DeviceDriverSet_RBGLED_Color(3, 255, 0, 255);
     delay(50);
 
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_back, /*speed_A*/ speed,
