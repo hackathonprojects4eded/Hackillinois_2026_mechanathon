@@ -9,9 +9,10 @@ Robot robot(MANUAL_MODE);
 
 DeviceDriverSet_passiveBuzzer buzzer;
 Adafruit_SoftServo servo;
+MPU6050Wrapper imu;
 
 unsigned long lastPacketTime = 0;
-unsigned long WATCHDOG_TIMEOUT_MS = 500; // stop if no packet for 500ms
+unsigned long WATCHDOG_TIMEOUT_MS = 100; // stop if no packet for 500ms
 
 void setup()
 {
@@ -21,6 +22,12 @@ void setup()
   {
     while (1)
       ;
+  }
+
+  bool ret = imu.begin();
+  if (!ret)
+  {
+    // Serial.println("failed to init imu");
   }
 
   buzzer.DeviceDriverSet_passiveBuzzer_Scale_c8(100);
@@ -53,15 +60,16 @@ void loop()
 {
   robot.update();
   servo.refresh();
+  imu.update();
 
-  Serial.print(F("quat:"));
-  Serial.print(robot.imu.getW());
-  Serial.print(F(","));
-  Serial.print(robot.imu.getX());
-  Serial.print(F(","));
-  Serial.print(robot.imu.getY());
-  Serial.print(F(","));
-  Serial.println(robot.imu.getZ());
+  // Serial.print(F("quat:"));
+  // Serial.print(robot.imu.getW());
+  // Serial.print(F(","));
+  // Serial.print(robot.imu.getX());
+  // Serial.print(F(","));
+  // Serial.print(robot.imu.getY());
+  // Serial.print(F(","));
+  // Serial.println(robot.imu.getZ());
 
   // Serial.println(robot.getRow());
 

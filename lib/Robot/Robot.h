@@ -40,7 +40,7 @@ private:
 
 public:
     DeviceDriverSet_RBGLED led;
-    MPU6050Wrapper imu;
+
     // DeviceDriverSet_Motor motor;
 
     Robot(bool &manualMode);
@@ -71,7 +71,7 @@ public:
     void setHeadReversed(bool reversed) { _headReversed = reversed; }
 
     // Accessors
-    float getYaw() const { return imu.getFilteredYaw(); }
-    float getPitch() const { return imu.getFilteredPitch(); }
-    float getRow() const { return imu.getFilteredRoll(); }
+    // float getYaw() const { return imu.getFilteredYaw(); }
+    // float getPitch() const { return imu.getFilteredPitch(); }
+    // float getRow() const { return imu.getFilteredRoll(); }
 };

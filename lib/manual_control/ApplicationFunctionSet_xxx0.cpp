@@ -16,6 +16,7 @@
 #include "Buzzer_control.h"
 #include "ArduinoJson-v6.11.1.h" //ArduinoJson
 #include "Adafruit_SoftServo.h"
+#include "MPU6050Wrapper.h"
 
 #define _is_print 1
 #define _Test_print 0 // When testing, remember to set 0 after using the test to save controller resources and load.
@@ -26,6 +27,9 @@ DeviceDriverSet_Motor AppMotor;
 extern DeviceDriverSet_passiveBuzzer buzzer;
 extern Adafruit_SoftServo servo;
 extern unsigned long lastPacketTime;
+extern MPU6050Wrapper imu;
+
+float robotTargetYaw = 0;
 
 /*f(x) int */
 static boolean
@@ -43,6 +47,36 @@ void ApplicationFunctionSet::ApplicationFunctionSet_Init(void)
 {
   // Serial.begin(9600);
   AppMotor.DeviceDriverSet_Motor_Init();
+}
+
+void _applyHeadingCorrection(uint8_t &speedA, uint8_t &speedB, float yaw)
+{
+  // yaw should be close to 0 for straight movement
+  // Negative yaw means robot is tilted left, so speed up right motor (B)
+  // Positive yaw means robot is tilted right, so speed up left motor (A)
+
+  const float YAW_THRESHOLD = 1.0f;  // Only correct if yaw error > threshold
+  const uint8_t CORRECTION_RATE = 3; // PWM adjustment per degree of yaw
+  const uint8_t MIN_SPEED = 100;     // Prevent motors from stalling
+  const uint8_t MAX_CORRECTION = 50; // Max PWM adjustment
+
+  if (fabs(yaw) > YAW_THRESHOLD)
+  {
+    uint8_t correction = min((uint8_t)(fabs(yaw) * CORRECTION_RATE), MAX_CORRECTION);
+
+    if (yaw < 0)
+    {
+      // Tilted left, speed up right motor (B)
+      speedA = max((uint8_t)(speedA - correction), MIN_SPEED);
+      speedB = min((uint8_t)(speedB + correction), 255);
+    }
+    else
+    {
+      // Tilted right, speed up left motor (A)
+      speedA = min((uint8_t)(speedA + correction), 255);
+      speedB = max((uint8_t)(speedB - correction), MIN_SPEED);
+    }
+  }
 }
 
 /*
@@ -67,7 +101,10 @@ static void ApplicationFunctionSet_OwlBotMotionControl(OwlBotMotionControl direc
   {
   case /* constant-expression */ Left:
     /* code */
+    servo.write(180);
+    servo.refresh();
 
+    robotTargetYaw = imu.getFilteredYaw() + 180.0f;
     buzzer.DeviceDriverSet_passiveBuzzer_controlMonosyllabic(0, 100);
 
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_just, /*speed_A*/ speed,
@@ -75,7 +112,10 @@ static void ApplicationFunctionSet_OwlBotMotionControl(OwlBotMotionControl direc
     break;
   case /* constant-expression */ Right:
     /* code */
+    servo.write(180);
+    servo.refresh();
 
+    robotTargetYaw = imu.getFilteredYaw() + 180.0f;
     buzzer.DeviceDriverSet_passiveBuzzer_controlMonosyllabic(0, 100);
 
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_back, /*speed_A*/ speed,
@@ -93,8 +133,19 @@ static void ApplicationFunctionSet_OwlBotMotionControl(OwlBotMotionControl direc
     break;
   case /* constant-expression */ Backward:
     /* code */
-    servo.write(95);
+    servo.write(75);
     servo.refresh();
+
+    float currentYaw = imu.getFilteredYaw();
+    uint8_t speedA = speed;
+    uint8_t speedB = speed;
+    _applyHeadingCorrection(speedA, speedB, currentYaw - robotTargetYaw);
+
+    AppMotor.DeviceDriverSet_Motor_control(
+        direction_back, speedA, // Motor A: forward with corrected speed
+        direction_back, speedB, // Motor B: forward with corrected speed
+        true);
+
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_back, /*speed_A*/ speed,
                                            /*direction_B*/ direction_back, /*speed_B*/ speed, /*controlED*/ control_enable); // Motor control
     break;

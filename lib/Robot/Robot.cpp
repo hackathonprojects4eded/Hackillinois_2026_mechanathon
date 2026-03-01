@@ -23,12 +23,12 @@ bool Robot::begin()
     // motor.DeviceDriverSet_Motor_Init();
     // ultrasonic.DeviceDriverSet_ULTRASONIC_Init();
     led.DeviceDriverSet_RBGLED_Init(95);
-    bool ret = imu.begin();
-    if (!ret)
-    {
-        // Serial.println("failed to init imu");
-        return false;
-    }
+    // bool ret = imu.begin();
+    // if (!ret)
+    // {
+    //     // Serial.println("failed to init imu");
+    //     return false;
+    // }
     return true;
 }
 
@@ -47,9 +47,11 @@ void Robot::update()
             direction_void, 0,
             control_enable);
         Application_OwlBotxxx0.Functional_Mode = Standby_mode;
+        Serial.println("Watch dog called");
     }
 
-    imu.update();
+    // imu.update();
+    Serial.println("Update");
 }
 
 // void Robot::moveToWall(uint16_t distanceToWall, uint8_t baseSpeed)
