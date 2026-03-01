@@ -3,8 +3,7 @@
 Robot::Robot(bool &manualMode)
     : _manualMode(manualMode), _isMoving(false), _targetDistance(0), _moveBaseSpeed(180),
       _isTurning(false), _targetTurnAngle(0), _turnAngleOffset(5.0f), _turnBothWheels(true),
-      _lastFilteredDistance(69), _headReversed(true),
-      ultrasonicFilter(2.0f, 5.0f, 2.0f) // mea_e=2cm, est_e=5cm, q=2cm (process noise)
+      _headReversed(true) // mea_e=2cm, est_e=5cm, q=2cm (process noise)
 {
 }
 
@@ -20,7 +19,7 @@ bool Robot::begin()
     servo.refresh();
 
     // motor.DeviceDriverSet_Motor_Init();
-    ultrasonic.DeviceDriverSet_ULTRASONIC_Init();
+    // ultrasonic.DeviceDriverSet_ULTRASONIC_Init();
     led.DeviceDriverSet_RBGLED_Init(95);
     bool ret = imu.begin();
     if (!ret)
@@ -38,23 +37,23 @@ void Robot::update()
     if (!_manualMode)
     {
         led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Red);
-        uint16_t rawDist = ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
-        delay(20);
-        rawDist += ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
-        rawDist /= 2;
-        if (!(rawDist > 5000 || rawDist == 150 || rawDist == 149))
-        {
-            _lastFilteredDistance = (uint16_t)ultrasonicFilter.updateEstimate((float)rawDist);
-        }
-        else
-        {
-            _lastFilteredDistance = 69;
-        }
+        // uint16_t rawDist = ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
+        // delay(20);
+        // rawDist += ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
+        // rawDist /= 2;
+        // if (!(rawDist > 5000 || rawDist == 150 || rawDist == 149))
+        // {
+        //     _lastFilteredDistance = (uint16_t)ultrasonicFilter.updateEstimate((float)rawDist);
+        // }
+        // else
+        // {
+        //     _lastFilteredDistance = 69;
+        // }
         // Serial.println(_lastFilteredDistance);
 
         imu.update();
         servo.refresh();
-        delay(20);
+        // delay(20);
     }
     else
     {

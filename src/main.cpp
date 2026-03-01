@@ -1,9 +1,12 @@
 #include <Arduino.h>
 
 #include "Robot.h"
+#include "Buzzer_control.h"
 
 bool MANUAL_MODE = true;
 Robot robot(MANUAL_MODE);
+
+DeviceDriverSet_passiveBuzzer buzzer;
 
 void setup()
 {
@@ -15,13 +18,7 @@ void setup()
       ;
   }
 
-  // robot.buzzer.DeviceDriverSet_passiveBuzzer_Scale_c8(100);
-
-  for (int i = 0; i < 10; i++)
-  {
-    robot.update();
-    Serial.println(robot.getDistance());
-  }
+  buzzer.DeviceDriverSet_passiveBuzzer_Scale_c8(100);
 
   robot.led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::LawnGreen);
   delay(1000);

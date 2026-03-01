@@ -1,7 +1,6 @@
 #pragma once
 
 #include "MPU6050Wrapper.h"
-#include "Ultrasonic_control.h"
 #include "SimpleKalmanFilter.h"
 #include <Adafruit_SoftServo.h>
 #include "ApplicationFunctionSet_xxx0.h"
@@ -10,12 +9,7 @@
 class Robot
 {
 private:
-    DeviceDriverSet_ULTRASONIC ultrasonic;
-
     ApplicationFunctionSet Application_FunctionSet;
-
-    SimpleKalmanFilter ultrasonicFilter; // Kalman filter for ultrasonic distance
-    uint16_t _lastFilteredDistance;      // Store last filtered distance value
 
     // Manual mode reference
     bool &_manualMode;
@@ -80,6 +74,4 @@ public:
     float getYaw() const { return imu.getFilteredYaw(); }
     float getPitch() const { return imu.getFilteredPitch(); }
     float getRow() const { return imu.getFilteredRoll(); }
-
-    uint16_t getDistance() const { return _lastFilteredDistance; }
 };
