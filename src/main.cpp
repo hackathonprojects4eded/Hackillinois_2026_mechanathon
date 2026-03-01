@@ -2,7 +2,7 @@
 
 #include "Robot.h"
 
-bool MANUAL_MODE = false;
+bool MANUAL_MODE = true;
 Robot robot(MANUAL_MODE);
 
 void setup()

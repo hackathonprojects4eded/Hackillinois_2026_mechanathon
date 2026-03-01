@@ -156,6 +156,15 @@ class RobotController:
             }
         )
 
+    def send_mode_command(self):
+        self.command_number += 1
+        self._write(
+            {
+                "N": 105,
+                "H": self.command_number % 100,
+            }
+        )
+
 
 # ======================================================================
 # GUI
@@ -175,6 +184,7 @@ class RobotControllerGUI:
         self.status_var = tk.StringVar(value="Disconnected")
         self.device_var = tk.StringVar()
         self._devices = []  # list of (address, name)
+        self._auto_mode = False
 
         self._setup_ui()
 
@@ -250,6 +260,22 @@ class RobotControllerGUI:
         btn(row3, "↙ L-Back", lambda: self._cmd("LeftBackward"), side="left", padx=5)
         btn(row3, "↓ Backward", lambda: self._cmd("Backward"), side="left", padx=5)
         btn(row3, "↘ R-Back", lambda: self._cmd("RightBackward"), side="left", padx=5)
+
+        # Mode toggle button
+        mode_row = ttk.Frame(motion_frame)
+        mode_row.pack(pady=10)
+        self._mode_btn = tk.Button(
+            mode_row,
+            text="🤖  Switch to Auto Mode",
+            width=22,
+            bg="#4a90d9",
+            fg="white",
+            font=("Arial", 10, "bold"),
+            relief="raised",
+            cursor="hand2",
+            command=self._toggle_mode,
+        )
+        self._mode_btn.pack()
 
         # --- Keyboard shortcuts ---
         info_frame = ttk.LabelFrame(self.root, text="Keyboard Shortcuts", padding=8)
@@ -393,6 +419,22 @@ class RobotControllerGUI:
         try:
             self.robot.send_motion_command(direction)
             self._log(f"→ {direction}")
+        except Exception as e:
+            self._log(f"Error: {e}")
+
+    def _toggle_mode(self):
+        if not self.robot.connected:
+            messagebox.showwarning("Not connected", "Connect to the robot first.")
+            return
+        try:
+            self.robot.send_mode_command()
+            self._auto_mode = not self._auto_mode
+            if self._auto_mode:
+                self._mode_btn.config(text="🕹  Switch to Manual Mode", bg="#e07b39")
+                self._log("→ Mode: Auto (N:105)")
+            else:
+                self._mode_btn.config(text="🤖  Switch to Auto Mode", bg="#4a90d9")
+                self._log("→ Mode: Manual (N:105)")
         except Exception as e:
             self._log(f"Error: {e}")
 
