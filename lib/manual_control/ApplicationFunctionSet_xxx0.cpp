@@ -17,7 +17,7 @@
 #include "ArduinoJson-v6.11.1.h" //ArduinoJson
 
 #define _is_print 1
-#define _Test_print 1 // When testing, remember to set 0 after using the test to save controller resources and load.
+#define _Test_print 0 // When testing, remember to set 0 after using the test to save controller resources and load.
 
 /*硬件设备成员对象序列*/
 extern bool MANUAL_MODE;
