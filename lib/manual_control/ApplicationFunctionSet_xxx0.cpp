@@ -282,8 +282,7 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
       case 104: /*<命令：N 104>*/
         break;
       case 105: /*<命令：N 105>*/
-        MANUAL_MODE = true;
-        Serial.println("hi");
+        MANUAL_MODE = !MANUAL_MODE;
         break;
       case 102: /*<命令：N 102> :摇杆控制命令*/
         Application_OwlBotxxx0.Functional_Mode = Rocker_mode;

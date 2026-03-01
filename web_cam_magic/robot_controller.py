@@ -1,27 +1,27 @@
 """
-Elegoo Owl Tank Bot - Bluetooth Control Interface
-Python/Tkinter GUI for controlling the robot via Bluetooth
+Elegoo Owl Tank Bot - BLE Bluetooth Control Interface
+Python/Tkinter GUI for controlling the robot via BLE (bleak)
+Works on macOS/Windows/Linux without pairing or serial ports.
 """
 
 import tkinter as tk
 from tkinter import ttk, messagebox
 import threading
+import asyncio
 import json
 import time
 
-try:
-    import bluetooth
+from bleak import BleakClient, BleakScanner
 
-    BLUETOOTH_AVAILABLE = True
-except ImportError:
-    BLUETOOTH_AVAILABLE = False
-    print("Warning: pybluez not installed. Install with: pip install pybluez")
+# BLE UUIDs discovered from the DX-BT16
+BLE_SERVICE_UUID = "0000ffe0-0000-1000-8000-00805f9b34fb"
+BLE_WRITE_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb"  # notify + read + write
+BLE_NOTIFY_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb"  # same char handles both
 
 
 class RobotController:
-    """Handles Bluetooth communication with the robot"""
+    """Handles BLE communication with the robot (DX-BT16)"""
 
-    # Motion directions (must match the robot firmware)
     DIRECTION_MAP = {
         "Forward": 1,
         "Backward": 2,
@@ -35,392 +35,380 @@ class RobotController:
     }
 
     def __init__(self):
-        self.socket = None
+        self.client = None
         self.connected = False
         self.command_number = 0
+        self.device_address = None
+        self._loop = None
+        self._thread = None
+        self.on_data_received = None  # optional callback(str)
 
+    # ------------------------------------------------------------------
+    # Internal: run a coroutine on the background event loop
+    # ------------------------------------------------------------------
+    def _run(self, coro):
+        if self._loop is None or not self._loop.is_running():
+            raise Exception("Event loop not running")
+        future = asyncio.run_coroutine_threadsafe(coro, self._loop)
+        return future.result(timeout=10)
+
+    def _start_loop(self):
+        """Start a dedicated asyncio event loop in a background thread."""
+        self._loop = asyncio.new_event_loop()
+        self._thread = threading.Thread(target=self._loop.run_forever, daemon=True)
+        self._thread.start()
+
+    # ------------------------------------------------------------------
+    # Scan
+    # ------------------------------------------------------------------
     def find_robot_devices(self):
-        """Scan for nearby Bluetooth devices"""
-        if not BLUETOOTH_AVAILABLE:
-            return []
+        """Scan for BLE devices and return list of (address, name)."""
 
-        print("Scanning for Bluetooth devices...")
-        try:
-            nearby_devices = bluetooth.discover_devices(duration=8, lookup_names=True)
-            print(f"Found {len(nearby_devices)} devices")
-            return nearby_devices
-        except Exception as e:
-            print(f"Error during device scan: {e}")
-            return []
+        async def _scan():
+            devices = await BleakScanner.discover(timeout=5.0)
+            return [(d.address, d.name or "Unknown") for d in devices]
 
-    def connect(self, device_address):
-        """Connect to the robot via Bluetooth"""
-        if not BLUETOOTH_AVAILABLE:
-            raise Exception("PyBluez not available. Install with: pip install pybluez")
+        if self._loop is None:
+            self._start_loop()
+        future = asyncio.run_coroutine_threadsafe(_scan(), self._loop)
+        return future.result(timeout=15)
 
-        try:
-            self.socket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-            self.socket.connect((device_address, 1))
-            self.socket.settimeout(2.0)
-            self.connected = True
-            print(f"Connected to {device_address}")
-            return True
-        except Exception as e:
-            self.connected = False
-            print(f"Connection failed: {e}")
-            raise
+    # ------------------------------------------------------------------
+    # Connect / Disconnect
+    # ------------------------------------------------------------------
+    def connect(self, address):
+        if self._loop is None:
+            self._start_loop()
+
+        self.device_address = address
+
+        async def _connect():
+            self.client = BleakClient(address)
+            await self.client.connect()
+            # Subscribe to notifications so we can read responses
+            await self.client.start_notify(BLE_NOTIFY_UUID, self._notification_handler)
+            return self.client.is_connected
+
+        result = asyncio.run_coroutine_threadsafe(_connect(), self._loop).result(
+            timeout=15
+        )
+        self.connected = result
+        return result
 
     def disconnect(self):
-        """Disconnect from the robot"""
-        if self.socket:
-            try:
-                self.socket.close()
-            except:
-                pass
+        if self.client is None:
             self.connected = False
-            print("Disconnected from robot")
+            return
+
+        async def _disconnect():
+            try:
+                await self.client.stop_notify(BLE_NOTIFY_UUID)
+            except Exception:
+                pass
+            await self.client.disconnect()
+
+        try:
+            asyncio.run_coroutine_threadsafe(_disconnect(), self._loop).result(
+                timeout=5
+            )
+        except Exception:
+            pass
+        self.connected = False
+
+    def _notification_handler(self, sender, data: bytearray):
+        """Called when the robot sends data back."""
+        text = data.decode("utf-8", errors="replace")
+        if self.on_data_received:
+            self.on_data_received(text)
+
+    # ------------------------------------------------------------------
+    # Commands
+    # ------------------------------------------------------------------
+    def _write(self, command_dict):
+        if not self.connected or self.client is None:
+            raise Exception("Not connected")
+        payload = json.dumps(command_dict).encode("utf-8")
+        print(f"Sending: {command_dict}")
+
+        async def _send():
+            await self.client.write_gatt_char(BLE_WRITE_UUID, payload, response=False)
+
+        asyncio.run_coroutine_threadsafe(_send(), self._loop).result(timeout=5)
 
     def send_motion_command(self, direction, speed=200):
-        """
-        Send a motion control command to the robot
-
-        Args:
-            direction: Motion direction (Forward, Backward, etc.)
-            speed: Speed value 0-255 (currently robot uses fixed speed in Rocker mode)
-        """
-        if not self.connected or not self.socket:
-            raise Exception("Not connected to robot")
-
         if direction not in self.DIRECTION_MAP:
             raise ValueError(f"Invalid direction: {direction}")
-
         self.command_number += 1
-        direction_code = self.DIRECTION_MAP[direction]
-
-        # Send JSON command: N=102 is rocker/joystick control mode
-        command = {"N": 102, "D1": direction_code, "H": self.command_number % 100}
-
-        command_str = json.dumps(command)
-        print(f"Sending: {command_str}")
-
-        try:
-            self.socket.send(command_str)
-        except Exception as e:
-            print(f"Error sending command: {e}")
-            self.connected = False
-            raise
+        self._write(
+            {
+                "N": 102,
+                "D1": self.DIRECTION_MAP[direction],
+                "H": self.command_number % 100,
+            }
+        )
 
     def send_stop_command(self):
-        """Send stop/clear command to the robot"""
-        if not self.connected or not self.socket:
-            raise Exception("Not connected to robot")
-
         self.command_number += 1
-        command = {"N": 100, "H": self.command_number % 100}
+        self._write(
+            {
+                "N": 100,
+                "H": self.command_number % 100,
+            }
+        )
 
-        command_str = json.dumps(command)
-        print(f"Sending: {command_str}")
 
-        try:
-            self.socket.send(command_str)
-        except Exception as e:
-            print(f"Error sending stop command: {e}")
-            self.connected = False
-            raise
+# ======================================================================
+# GUI
+# ======================================================================
 
 
 class RobotControllerGUI:
-    """Tkinter GUI for the robot controller"""
-
     def __init__(self, root):
         self.root = root
-        self.root.title("Elegoo Owl Tank Bot - Bluetooth Controller")
-        self.root.geometry("600x750")
+        self.root.title("Elegoo Owl Tank Bot - BLE Controller")
+        self.root.geometry("620x780")
         self.root.resizable(False, False)
 
         self.robot = RobotController()
+        self.robot.on_data_received = self._on_robot_data
+
         self.status_var = tk.StringVar(value="Disconnected")
         self.device_var = tk.StringVar()
-        self.command_thread = None
+        self._devices = []  # list of (address, name)
 
-        self.setup_ui()
+        self._setup_ui()
 
-    def setup_ui(self):
-        """Create the user interface"""
-
-        # Title
-        title_frame = ttk.Frame(self.root)
-        title_frame.pack(pady=10)
+    # ------------------------------------------------------------------
+    # UI setup
+    # ------------------------------------------------------------------
+    def _setup_ui(self):
         ttk.Label(
-            title_frame,
-            text="Elegoo Owl Tank Bot Controller",
+            self.root,
+            text="Elegoo Owl Tank Bot - BLE Controller",
             font=("Arial", 16, "bold"),
-        ).pack()
+        ).pack(pady=10)
 
-        # Connection Frame
+        # --- Connection ---
         conn_frame = ttk.LabelFrame(self.root, text="Connection", padding=10)
         conn_frame.pack(padx=10, pady=5, fill="x")
 
-        button_frame = ttk.Frame(conn_frame)
-        button_frame.pack(pady=5)
-        ttk.Button(button_frame, text="Scan Devices", command=self.scan_devices).pack(
+        btn_row = ttk.Frame(conn_frame)
+        btn_row.pack(pady=5)
+        ttk.Button(btn_row, text="Scan BLE Devices", command=self._scan).pack(
             side="left", padx=5
         )
-        ttk.Button(button_frame, text="Connect", command=self.connect_robot).pack(
+        ttk.Button(btn_row, text="Connect", command=self._connect).pack(
             side="left", padx=5
         )
-        ttk.Button(button_frame, text="Disconnect", command=self.disconnect_robot).pack(
+        ttk.Button(btn_row, text="Disconnect", command=self._disconnect).pack(
             side="left", padx=5
         )
 
-        device_frame = ttk.Frame(conn_frame)
-        device_frame.pack(pady=5, fill="x")
-        ttk.Label(device_frame, text="Device:").pack(side="left", padx=5)
-
+        dev_row = ttk.Frame(conn_frame)
+        dev_row.pack(pady=5, fill="x")
+        ttk.Label(dev_row, text="Device:").pack(side="left", padx=5)
         self.device_combo = ttk.Combobox(
-            device_frame, textvariable=self.device_var, state="readonly", width=50
+            dev_row, textvariable=self.device_var, state="readonly", width=52
         )
         self.device_combo.pack(side="left", padx=5, fill="x", expand=True)
 
-        status_frame = ttk.Frame(conn_frame)
-        status_frame.pack(pady=5, fill="x")
-        ttk.Label(status_frame, text="Status:").pack(side="left", padx=5)
-        ttk.Label(
-            status_frame,
+        stat_row = ttk.Frame(conn_frame)
+        stat_row.pack(pady=5, fill="x")
+        ttk.Label(stat_row, text="Status:").pack(side="left", padx=5)
+        self._status_label = ttk.Label(
+            stat_row,
             textvariable=self.status_var,
             foreground="red",
             font=("Arial", 10, "bold"),
-        ).pack(side="left", padx=5)
+        )
+        self._status_label.pack(side="left", padx=5)
 
-        # Motion Control Frame
+        # --- Motion ---
         motion_frame = ttk.LabelFrame(self.root, text="Motion Control", padding=10)
-        motion_frame.pack(padx=10, pady=5, fill="both", expand=True)
+        motion_frame.pack(padx=10, pady=5, fill="both")
 
-        # Directional pad layout
-        pad_frame = ttk.Frame(motion_frame)
-        pad_frame.pack(pady=20)
+        pad = ttk.Frame(motion_frame)
+        pad.pack(pady=20)
 
-        # Row 1: Diagonal forward
-        row1 = ttk.Frame(pad_frame)
+        def btn(parent, label, cmd, **pack_kwargs):
+            ttk.Button(parent, text=label, width=9, command=cmd).pack(**pack_kwargs)
+
+        row1 = ttk.Frame(pad)
         row1.pack()
-        ttk.Button(
-            row1,
-            text="↖ L-Fwd",
-            width=8,
-            command=lambda: self.send_command("LeftForward"),
-        ).pack(side="left", padx=5)
-        ttk.Button(
-            row1,
-            text="↑ Forward",
-            width=8,
-            command=lambda: self.send_command("Forward"),
-        ).pack(side="left", padx=5)
-        ttk.Button(
-            row1,
-            text="↗ R-Fwd",
-            width=8,
-            command=lambda: self.send_command("RightForward"),
-        ).pack(side="left", padx=5)
+        btn(row1, "↖ L-Fwd", lambda: self._cmd("LeftForward"), side="left", padx=5)
+        btn(row1, "↑ Forward", lambda: self._cmd("Forward"), side="left", padx=5)
+        btn(row1, "↗ R-Fwd", lambda: self._cmd("RightForward"), side="left", padx=5)
 
-        # Row 2: Left-right
-        row2 = ttk.Frame(pad_frame)
+        row2 = ttk.Frame(pad)
         row2.pack(pady=10)
-        ttk.Button(
-            row2, text="← Left", width=8, command=lambda: self.send_command("Left")
-        ).pack(side="left", padx=5)
-        ttk.Button(row2, text="Stop", width=8, command=self.stop_robot).pack(
-            side="left", padx=5
-        )
-        ttk.Button(
-            row2, text="Right →", width=8, command=lambda: self.send_command("Right")
-        ).pack(side="left", padx=5)
+        btn(row2, "← Left", lambda: self._cmd("Left"), side="left", padx=5)
+        btn(row2, "⏹ Stop", self._stop, side="left", padx=5)
+        btn(row2, "Right →", lambda: self._cmd("Right"), side="left", padx=5)
 
-        # Row 3: Diagonal backward
-        row3 = ttk.Frame(pad_frame)
+        row3 = ttk.Frame(pad)
         row3.pack()
-        ttk.Button(
-            row3,
-            text="↙ L-Back",
-            width=8,
-            command=lambda: self.send_command("LeftBackward"),
-        ).pack(side="left", padx=5)
-        ttk.Button(
-            row3,
-            text="↓ Backward",
-            width=8,
-            command=lambda: self.send_command("Backward"),
-        ).pack(side="left", padx=5)
-        ttk.Button(
-            row3,
-            text="↘ R-Back",
-            width=8,
-            command=lambda: self.send_command("RightBackward"),
-        ).pack(side="left", padx=5)
+        btn(row3, "↙ L-Back", lambda: self._cmd("LeftBackward"), side="left", padx=5)
+        btn(row3, "↓ Backward", lambda: self._cmd("Backward"), side="left", padx=5)
+        btn(row3, "↘ R-Back", lambda: self._cmd("RightBackward"), side="left", padx=5)
 
-        # Keyboard shortcuts info
-        info_frame = ttk.LabelFrame(
-            self.root, text="Keyboard Shortcuts (when connected)", padding=10
-        )
+        # --- Keyboard shortcuts ---
+        info_frame = ttk.LabelFrame(self.root, text="Keyboard Shortcuts", padding=8)
         info_frame.pack(padx=10, pady=5, fill="x")
+        for line in [
+            "Arrow keys = Forward / Backward / Left / Right",
+            "W = L-Fwd  |  A = L-Back  |  E = R-Fwd  |  D = R-Back",
+            "Space = Stop",
+        ]:
+            ttk.Label(info_frame, text=line, font=("Arial", 9)).pack(anchor="w")
 
-        shortcuts = [
-            "↑ = Forward  |  ↓ = Backward  |  ← = Left  |  → = Right",
-            "W = L-Fwd  |  A = L-Back  |  E = R-Fwd  |  D = R-Back  |  Space = Stop",
-        ]
-        for shortcut in shortcuts:
-            ttk.Label(info_frame, text=shortcut, font=("Arial", 9)).pack(anchor="w")
-
-        # Log Frame
-        log_frame = ttk.LabelFrame(self.root, text="Command Log", padding=5)
+        # --- Log ---
+        log_frame = ttk.LabelFrame(self.root, text="Log", padding=5)
         log_frame.pack(padx=10, pady=5, fill="both", expand=True)
+        self.log_text = tk.Text(log_frame, height=10, width=72, state="disabled")
+        scrollbar = ttk.Scrollbar(log_frame, command=self.log_text.yview)
+        self.log_text.configure(yscrollcommand=scrollbar.set)
+        self.log_text.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
 
-        self.log_text = tk.Text(log_frame, height=8, width=70, state="disabled")
-        self.log_text.pack(fill="both", expand=True)
-
-        # Bind keyboard events
+        # Keyboard bindings
+        bindings = {
+            "<Up>": "Forward",
+            "<Down>": "Backward",
+            "<Left>": "Left",
+            "<Right>": "Right",
+            "w": "LeftForward",
+            "a": "LeftBackward",
+            "e": "RightForward",
+            "d": "RightBackward",
+        }
+        for key, direction in bindings.items():
+            self.root.bind(
+                key,
+                lambda e, d=direction: self._cmd(d) if self.robot.connected else None,
+            )
         self.root.bind(
-            "<Up>",
-            lambda e: self.send_command("Forward") if self.robot.connected else None,
-        )
-        self.root.bind(
-            "<Down>",
-            lambda e: self.send_command("Backward") if self.robot.connected else None,
-        )
-        self.root.bind(
-            "<Left>",
-            lambda e: self.send_command("Left") if self.robot.connected else None,
-        )
-        self.root.bind(
-            "<Right>",
-            lambda e: self.send_command("Right") if self.robot.connected else None,
-        )
-        self.root.bind(
-            "w",
-            lambda e: (
-                self.send_command("LeftForward") if self.robot.connected else None
-            ),
-        )
-        self.root.bind(
-            "a",
-            lambda e: (
-                self.send_command("LeftBackward") if self.robot.connected else None
-            ),
-        )
-        self.root.bind(
-            "e",
-            lambda e: (
-                self.send_command("RightForward") if self.robot.connected else None
-            ),
-        )
-        self.root.bind(
-            "d",
-            lambda e: (
-                self.send_command("RightBackward") if self.robot.connected else None
-            ),
-        )
-        self.root.bind(
-            "<space>", lambda e: self.stop_robot() if self.robot.connected else None
+            "<space>", lambda e: self._stop() if self.robot.connected else None
         )
 
-    def log_message(self, message):
-        """Add message to the log"""
+    # ------------------------------------------------------------------
+    # Helpers
+    # ------------------------------------------------------------------
+    def _log(self, msg):
         self.log_text.config(state="normal")
-        timestamp = time.strftime("%H:%M:%S")
-        self.log_text.insert("end", f"[{timestamp}] {message}\n")
+        self.log_text.insert("end", f"[{time.strftime('%H:%M:%S')}] {msg}\n")
         self.log_text.see("end")
         self.log_text.config(state="disabled")
 
-    def scan_devices(self):
-        """Scan for Bluetooth devices"""
-        if not BLUETOOTH_AVAILABLE:
-            messagebox.showerror(
-                "Error", "PyBluez not installed.\n\nInstall with:\npip install pybluez"
-            )
-            return
+    def _set_status(self, text, color="red"):
+        self.status_var.set(text)
+        self._status_label.config(foreground=color)
 
-        self.log_message("Scanning for Bluetooth devices...")
+    def _on_robot_data(self, text):
+        """Called from the BLE thread — post to Tkinter safely."""
+        self.root.after(0, lambda: self._log(f"← Robot: {text.strip()}"))
+
+    # ------------------------------------------------------------------
+    # Actions
+    # ------------------------------------------------------------------
+    def _scan(self):
+        self._log("Scanning for BLE devices (5 s)…")
+        self._set_status("Scanning…", "orange")
         self.root.update()
 
-        # Run scan in a thread to avoid blocking UI
-        def scan():
+        def do_scan():
             try:
                 devices = self.robot.find_robot_devices()
-                self.devices = devices
-
-                if devices:
-                    device_names = [f"{name} ({addr})" for addr, name in devices]
-                    self.device_combo["values"] = device_names
-                    self.log_message(f"Found {len(devices)} devices")
-                else:
-                    self.log_message("No devices found")
-                    messagebox.showwarning(
-                        "No Devices",
-                        "No Bluetooth devices found. Make sure your robot is powered on.",
-                    )
+                self._devices = devices
+                labels = [f"{name}  ({addr})" for addr, name in devices]
+                self.root.after(0, lambda: self._scan_done(labels, len(devices)))
             except Exception as e:
-                self.log_message(f"Scan error: {str(e)}")
-                messagebox.showerror("Scan Error", str(e))
+                self.root.after(0, lambda: self._log(f"Scan error: {e}"))
+                self.root.after(0, lambda: self._set_status("Scan failed"))
 
-        thread = threading.Thread(target=scan, daemon=True)
-        thread.start()
+        threading.Thread(target=do_scan, daemon=True).start()
 
-    def connect_robot(self):
-        """Connect to the selected device"""
-        if self.device_var.get() == "":
-            messagebox.showwarning(
-                "No Device Selected", "Please scan and select a device first"
-            )
+    def _scan_done(self, labels, count):
+        self.device_combo["values"] = labels
+        if count:
+            # Auto-select Elegoo if found
+            for i, lbl in enumerate(labels):
+                if "ELEGOO" in lbl.upper() or "BT16" in lbl.upper():
+                    self.device_combo.current(i)
+                    break
+            else:
+                self.device_combo.current(0)
+            self._log(f"Found {count} device(s)")
+            self._set_status("Ready to connect", "blue")
+        else:
+            self._log("No devices found — is the robot powered on?")
+            self._set_status("No devices found")
+
+    def _connect(self):
+        if not self.device_var.get():
+            messagebox.showwarning("No device", "Scan first, then select a device.")
             return
 
-        try:
-            # Extract address from the displayed text
-            device_name = self.device_var.get()
-            device_addr = device_name.split("(")[-1].rstrip(")")
+        # Find matching address
+        selected = self.device_var.get()
+        address = None
+        for addr, name in self._devices:
+            if addr in selected:
+                address = addr
+                break
 
-            self.log_message(f"Connecting to {device_name}...")
-            self.robot.connect(device_addr)
+        if not address:
+            messagebox.showerror("Error", "Could not parse device address.")
+            return
 
-            self.status_var.set("Connected")
-            self.log_message("Successfully connected!")
-            messagebox.showinfo("Connected", f"Connected to {device_name}")
-        except Exception as e:
-            self.status_var.set("Connection Failed")
-            self.log_message(f"Connection failed: {str(e)}")
-            messagebox.showerror("Connection Failed", str(e))
+        self._log(f"Connecting to {selected}…")
+        self._set_status("Connecting…", "orange")
 
-    def disconnect_robot(self):
-        """Disconnect from the robot"""
+        def do_connect():
+            try:
+                self.robot.connect(address)
+                self.root.after(0, self._connect_ok)
+            except Exception as e:
+                self.root.after(0, lambda: self._connect_fail(str(e)))
+
+        threading.Thread(target=do_connect, daemon=True).start()
+
+    def _connect_ok(self):
+        self._set_status("Connected ✓", "green")
+        self._log("Connected!")
+
+    def _connect_fail(self, msg):
+        self._set_status("Failed")
+        self._log(f"Connection failed: {msg}")
+        messagebox.showerror("Connection Failed", msg)
+
+    def _disconnect(self):
         self.robot.disconnect()
-        self.status_var.set("Disconnected")
-        self.log_message("Disconnected from robot")
+        self._set_status("Disconnected")
+        self._log("Disconnected")
 
-    def send_command(self, direction):
-        """Send a motion command"""
+    def _cmd(self, direction):
         if not self.robot.connected:
-            messagebox.showwarning("Not Connected", "Please connect to the robot first")
+            messagebox.showwarning("Not connected", "Connect to the robot first.")
             return
-
         try:
             self.robot.send_motion_command(direction)
-            self.log_message(f"Sent: {direction}")
+            self._log(f"→ {direction}")
         except Exception as e:
-            self.log_message(f"Error: {str(e)}")
-            self.status_var.set("Error")
-            messagebox.showerror("Command Error", str(e))
+            self._log(f"Error: {e}")
 
-    def stop_robot(self):
-        """Send stop command"""
+    def _stop(self):
         if not self.robot.connected:
-            messagebox.showwarning("Not Connected", "Please connect to the robot first")
             return
-
         try:
             self.robot.send_stop_command()
-            self.log_message("Sent: Stop")
+            self._log("→ Stop")
         except Exception as e:
-            self.log_message(f"Error: {str(e)}")
-            self.status_var.set("Error")
-            messagebox.showerror("Command Error", str(e))
+            self._log(f"Error: {e}")
+
+
+# ======================================================================
+# Entry point
+# ======================================================================
 
 
 def main():
