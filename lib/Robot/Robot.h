@@ -2,7 +2,7 @@
 
 #include "MPU6050Wrapper.h"
 #include "SimpleKalmanFilter.h"
-#include <Adafruit_SoftServo.h>
+
 #include "ApplicationFunctionSet_xxx0.h"
 #include "LED_control.h"
 
@@ -32,7 +32,7 @@ private:
     float robotTargetYaw;
 
     // Helper functions
-    float _normalizeAngle(float angle);
+    // float _normalizeAngle(float angle);
     // bool _isAtTargetAngle(float currentYaw, float targetYaw, float offset);
     // void _applyHeadingCorrection(uint8_t &speedA, uint8_t &speedB, float yaw);
     // bool _reverseDirection(bool direction); // Reverse a direction if head is reversed
@@ -42,7 +42,7 @@ public:
     DeviceDriverSet_RBGLED led;
     MPU6050Wrapper imu;
     // DeviceDriverSet_Motor motor;
-    Adafruit_SoftServo servo;
+
     Robot(bool &manualMode);
 
     // Initialize robot components

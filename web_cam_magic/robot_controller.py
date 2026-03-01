@@ -429,25 +429,48 @@ class RobotControllerGUI:
         self.root.bind("<KeyPress-space>", lambda e: self._stop())
 
     # ------------------------------------------------------------------
-    # Idle / held-key loop (runs every IDLE_INTERVAL_MS via root.after)
+    # Idle / held-key loop
     # ------------------------------------------------------------------
     def _idle_loop(self):
         if self.robot.connected:
             try:
-                if self._held_direction is not None:
-                    self.robot.send_motion_command(self._held_direction)
-                else:
-                    self.robot.send_idle_command()
+                if self._held_direction is None:
+                    # Only send idle if we weren't already idle
+                    if self._last_sent_direction is not None:
+                        self.robot.send_idle_command()
+                        self._last_sent_direction = None
             except Exception:
                 pass
         self.root.after(IDLE_INTERVAL_MS, self._idle_loop)
 
     def _key_press(self, direction):
-        if self.robot.connected:
-            self._held_direction = direction
+        if not self.robot.connected:
+            return
+        if direction == self._held_direction:
+            return  # already holding this key, do nothing
+        self._held_direction = direction
+        # Send immediately on press, then schedule repeats
+        self._send_motion_once(direction)
+        self._schedule_repeat(direction)
 
     def _key_release(self):
         self._held_direction = None
+        # idle_loop will send the idle packet on its next tick
+
+    def _send_motion_once(self, direction):
+        """Send a motion command and record it."""
+        try:
+            self.robot.send_motion_command(direction)
+            self._last_sent_direction = direction
+        except Exception as e:
+            self._log(f"Error: {e}")
+
+    def _schedule_repeat(self, direction):
+        """Re-send the held direction at a slow rate so the robot doesn't stop."""
+        if self._held_direction != direction:
+            return  # key was released or changed, stop repeating
+        self._send_motion_once(direction)
+        self.root.after(MOTION_REPEAT_MS, lambda: self._schedule_repeat(direction))
 
     # ------------------------------------------------------------------
     # Helpers
@@ -554,6 +577,7 @@ class RobotControllerGUI:
     def _disconnect(self):
         self.robot.disconnect()
         self._held_direction = None
+        self._last_sent_direction = None
         self._set_status("Disconnected")
         self._log("Disconnected")
 
@@ -577,6 +601,7 @@ class RobotControllerGUI:
         if not self.robot.connected:
             return
         self._held_direction = None
+        self._last_sent_direction = None
         try:
             self.robot.send_stop_command()
             self._log("→ Stop")

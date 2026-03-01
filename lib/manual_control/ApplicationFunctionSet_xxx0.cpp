@@ -15,6 +15,7 @@
 #include "DeviceDriverSet_xxx0.h"
 #include "Buzzer_control.h"
 #include "ArduinoJson-v6.11.1.h" //ArduinoJson
+#include "Adafruit_SoftServo.h"
 
 #define _is_print 1
 #define _Test_print 0 // When testing, remember to set 0 after using the test to save controller resources and load.
@@ -22,10 +23,13 @@
 /*硬件设备成员对象序列*/
 extern bool MANUAL_MODE;
 DeviceDriverSet_Motor AppMotor;
-DeviceDriverSet_passiveBuzzer buzzer;
+extern DeviceDriverSet_passiveBuzzer buzzer;
+extern Adafruit_SoftServo servo;
+extern unsigned long lastPacketTime;
 
 /*f(x) int */
-static boolean function_xxx(long x, long s, long e) // f(x)
+static boolean
+function_xxx(long x, long s, long e) // f(x)
 {
   if (s <= x && x <= e)
     return true;
@@ -33,50 +37,6 @@ static boolean function_xxx(long x, long s, long e) // f(x)
     return false;
 }
 
-/*Motion direction control sequence*/
-enum OwlBotMotionControl
-{
-  Forward,       //(1)
-  Backward,      //(2)
-  Left,          //(3)
-  Right,         //(4)
-  LeftForward,   //(5)
-  LeftBackward,  //(6)
-  RightForward,  //(7)
-  RightBackward, //(8)
-  stop_it        //(9)
-}; // direction:前行（1）、后退（2）、 左前（3）、右前（4）、后左（5）、后右（6）
-
-/*Mode control sequence*/
-enum OwlBotFunctionalModel
-{
-  Standby_mode,           /*idle mode*/
-  TraceBased_mode,        /* tracking mode*/
-  ObstacleAvoidance_mode, /*obstacle mode*/
-  Rocker_mode,            /*rocker mode*/
-
-  CMD_Programming_mode,                   /*programming mode*/
-  CMD_ClearAllFunctions_Standby_mode,     /*clear all functions: enter idle mode*/
-  CMD_ClearAllFunctions_Programming_mode, /* clear all functions: enter programming mode*/
-  CMD_MotorControl,                       /* motor control mode*/
-  CMD_CarControl_TimeLimit,               /*car direction control: time limited mode*/
-  CMD_CarControl_NoTimeLimit,             /* car direction control: no time limit mode*/
-  CMD_MotorControl_Speed,                 /* motor control: control speed mode*/
-  CMD_ServoControl,                       /* servo control: mode*/
-  CMD_VoiceControl,                       /*voice control: mode*/
-  CMD_ledExpressionControl,               /*matrix expressioncontrol: mode*/
-  CMD_ledNumberControl,                   /*matrix digital control: mode*/
-  CMD_LightingControl_TimeLimit,          /*light control: mode*/
-  CMD_LightingControl_NoTimeLimit,        /*light control: mode*/
-  CMD_TrajectoryControl,                  /*Trajectory control: mode*/
-};
-
-/*Control management member*/
-struct Application_xxx
-{
-  OwlBotMotionControl Motion_Control;
-  OwlBotFunctionalModel Functional_Mode;
-};
 Application_xxx Application_OwlBotxxx0;
 
 void ApplicationFunctionSet::ApplicationFunctionSet_Init(void)
@@ -123,7 +83,9 @@ static void ApplicationFunctionSet_OwlBotMotionControl(OwlBotMotionControl direc
     break;
   case /* constant-expression */ Forward:
     /* code */
-
+    // backwards tech, up
+    servo.write(180);
+    servo.refresh();
     buzzer.DeviceDriverSet_passiveBuzzer_controlMonosyllabic(0, 100);
 
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_just, /*speed_A*/ speed,
@@ -131,7 +93,8 @@ static void ApplicationFunctionSet_OwlBotMotionControl(OwlBotMotionControl direc
     break;
   case /* constant-expression */ Backward:
     /* code */
-
+    servo.write(95);
+    servo.refresh();
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_back, /*speed_A*/ speed,
                                            /*direction_B*/ direction_back, /*speed_B*/ speed, /*controlED*/ control_enable); // Motor control
     break;
@@ -243,6 +206,7 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
     DeserializationError error = deserializeJson(doc, SerialPortData); // 反序列化JSON数据
     if (!error)                                                        // 检查反序列化是否成功
     {
+      lastPacketTime = millis();
       int control_mode_N = doc["N"];
 #if _Test_print
       Serial.println(control_mode_N);
@@ -287,6 +251,7 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
       case 103: /*<命令：N 103>*/
         break;
       case 110: /*<命令：N 110>*/
+        Application_OwlBotxxx0.Functional_Mode = CMD_ClearAllFunctions_Standby_mode;
         break;
       case 100:                                                                      /*<命令：N 100>*/
         Application_OwlBotxxx0.Functional_Mode = CMD_ClearAllFunctions_Standby_mode; /*清除功能：进入空闲模式*/

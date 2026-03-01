@@ -1,4 +1,11 @@
 #include "Robot.h"
+#include <DeviceDriverSet_xxx0.h>
+#include "ApplicationFunctionSet_xxx0.h"
+
+extern unsigned long lastPacketTime;
+extern unsigned long WATCHDOG_TIMEOUT_MS;
+extern DeviceDriverSet_Motor AppMotor;
+extern Application_xxx Application_OwlBotxxx0;
 
 Robot::Robot(bool &manualMode)
     : _manualMode(manualMode), _isMoving(false), _targetDistance(0), _moveBaseSpeed(180),
@@ -13,11 +20,6 @@ bool Robot::begin()
 
     Application_FunctionSet.ApplicationFunctionSet_Init();
     Application_FunctionSet.CMD_ClearAllFunctionsXXX();
-
-    servo.attach(3);
-    servo.write(90);
-    servo.refresh();
-
     // motor.DeviceDriverSet_Motor_Init();
     // ultrasonic.DeviceDriverSet_ULTRASONIC_Init();
     led.DeviceDriverSet_RBGLED_Init(95);
@@ -34,33 +36,20 @@ void Robot::update()
 {
     Application_FunctionSet.ApplicationFunctionSet_SerialPortDataAnalysis();
 
-    if (!_manualMode)
-    {
-        led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Red);
-        // uint16_t rawDist = ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
-        // delay(20);
-        // rawDist += ultrasonic.DeviceDriverSet_ULTRASONIC_GetDistanceCm();
-        // rawDist /= 2;
-        // if (!(rawDist > 5000 || rawDist == 150 || rawDist == 149))
-        // {
-        //     _lastFilteredDistance = (uint16_t)ultrasonicFilter.updateEstimate((float)rawDist);
-        // }
-        // else
-        // {
-        //     _lastFilteredDistance = 69;
-        // }
-        // Serial.println(_lastFilteredDistance);
+    led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Blue);
+    Application_FunctionSet.ApplicationFunctionSet_Rocker();
+    Application_FunctionSet.CMD_ClearAllFunctionsXXX();
 
-        imu.update();
-        servo.refresh();
-        // delay(20);
-    }
-    else
+    if (millis() - lastPacketTime > WATCHDOG_TIMEOUT_MS)
     {
-        led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Blue);
-        Application_FunctionSet.ApplicationFunctionSet_Rocker();
-        Application_FunctionSet.CMD_ClearAllFunctionsXXX();
+        AppMotor.DeviceDriverSet_Motor_control(
+            direction_void, 0,
+            direction_void, 0,
+            control_enable);
+        Application_OwlBotxxx0.Functional_Mode = Standby_mode;
     }
+
+    imu.update();
 }
 
 // void Robot::moveToWall(uint16_t distanceToWall, uint8_t baseSpeed)

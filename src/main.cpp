@@ -2,11 +2,16 @@
 
 #include "Robot.h"
 #include "Buzzer_control.h"
+#include <Adafruit_SoftServo.h>
 
 bool MANUAL_MODE = true;
 Robot robot(MANUAL_MODE);
 
-extern DeviceDriverSet_passiveBuzzer buzzer;
+DeviceDriverSet_passiveBuzzer buzzer;
+Adafruit_SoftServo servo;
+
+unsigned long lastPacketTime = 0;
+unsigned long WATCHDOG_TIMEOUT_MS = 500; // stop if no packet for 500ms
 
 void setup()
 {
@@ -20,9 +25,16 @@ void setup()
 
   buzzer.DeviceDriverSet_passiveBuzzer_Scale_c8(100);
 
-  robot.led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::LawnGreen);
+  robot.led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::DarkGreen);
   delay(1000);
   robot.led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
+
+  servo.attach(3);
+  servo.write(90);
+  servo.refresh();
+
+  // robot.servo.write(90); // 90 is down 180 is up
+  // robot.servo.refresh();
 
   // delay(5000);
 
@@ -40,6 +52,7 @@ void setup()
 void loop()
 {
   robot.update();
+  servo.refresh();
 
   Serial.print(F("quat:"));
   Serial.print(robot.imu.getW());
