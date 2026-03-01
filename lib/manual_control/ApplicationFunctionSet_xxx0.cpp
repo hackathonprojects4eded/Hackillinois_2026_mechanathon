@@ -13,7 +13,7 @@
 #include <string.h>
 #include "ApplicationFunctionSet_xxx0.h"
 #include "DeviceDriverSet_xxx0.h"
-
+#include "Buzzer_control.h"
 #include "ArduinoJson-v6.11.1.h" //ArduinoJson
 
 #define _is_print 1
@@ -22,6 +22,8 @@
 /*硬件设备成员对象序列*/
 extern bool MANUAL_MODE;
 DeviceDriverSet_Motor AppMotor;
+DeviceDriverSet_passiveBuzzer buzzer;
+static unsigned long lastBuzzTime = 0;
 
 /*f(x) int */
 static boolean function_xxx(long x, long s, long e) // f(x)
@@ -95,6 +97,10 @@ void ApplicationFunctionSet::ApplicationFunctionSet_Init(void)
 $ Shenzhen, China:Elegoo & HOU Changhua & 2019-09
  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 */
+
+// produce intermittent beeps while actually turning left or right
+  // maintain static timer across calls 
+
 static void ApplicationFunctionSet_OwlBotMotionControl(OwlBotMotionControl direction, uint8_t speed)
 {
   ApplicationFunctionSet Application_FunctionSet;
@@ -102,11 +108,16 @@ static void ApplicationFunctionSet_OwlBotMotionControl(OwlBotMotionControl direc
   {
   case /* constant-expression */ Left:
     /* code */
+    if (millis() - lastBuzzTime >= 500) {
+      lastBuzzTime = millis();
+      buzzer.DeviceDriverSet_passiveBuzzer_controlMonosyllabic(0, 100);
+    }
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_just, /*speed_A*/ speed,
                                            /*direction_B*/ direction_back, /*speed_B*/ speed, /*controlED*/ control_enable); // Motor control
     break;
   case /* constant-expression */ Right:
     /* code */
+    buzzer.DeviceDriverSet_passiveBuzzer_controlMonosyllabic(0, 100);
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_back, /*speed_A*/ speed,
                                            /*direction_B*/ direction_just, /*speed_B*/ speed, /*controlED*/ control_enable); // Motor control
     break;
@@ -117,6 +128,7 @@ static void ApplicationFunctionSet_OwlBotMotionControl(OwlBotMotionControl direc
     break;
   case /* constant-expression */ Backward:
     /* code */
+    buzzer.DeviceDriverSet_passiveBuzzer_controlMonosyllabic(0, 100);
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_back, /*speed_A*/ speed,
                                            /*direction_B*/ direction_back, /*speed_B*/ speed, /*controlED*/ control_enable); // Motor control
     break;

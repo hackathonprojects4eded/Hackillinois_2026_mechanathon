@@ -7,6 +7,7 @@
 #include <Adafruit_SoftServo.h>
 #include "ApplicationFunctionSet_xxx0.h"
 #include "LED_control.h"
+#include "Buzzer_control.h"
 
 class Robot
 {
@@ -47,7 +48,7 @@ private:
     float _reverseAngle(float angle);       // Reverse an angle if head is reversed
 
 public:
-    // DeviceDriverSet_passiveBuzzer buzzer; // added buzzer for audio cues
+    DeviceDriverSet_passiveBuzzer buzzer; // added buzzer for audio cues
     DeviceDriverSet_RBGLED led;
     DeviceDriverSet_Motor motor;
     Adafruit_SoftServo servo;
