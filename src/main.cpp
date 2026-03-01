@@ -43,7 +43,17 @@ void setup()
 void loop()
 {
   robot.update();
-  Serial.println(robot.getRow());
+
+  Serial.print(F("quat:"));
+  Serial.print(robot.imu.getW());
+  Serial.print(F(","));
+  Serial.print(robot.imu.getX());
+  Serial.print(F(","));
+  Serial.print(robot.imu.getY());
+  Serial.print(F(","));
+  Serial.println(robot.imu.getZ());
+
+  // Serial.println(robot.getRow());
 
   // float roll = robot.getRow(); // this is actually pitch
   // float pitch = roll;          // fix sensor frame

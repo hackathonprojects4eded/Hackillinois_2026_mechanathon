@@ -15,7 +15,7 @@
 
 // #define OUTPUT_READABLE_QUATERNION
 // #define OUTPUT_READABLE_EULER
-#define OUTPUT_READABLE_YAWPITCHROLL
+// #define OUTPUT_READABLE_YAWPITCHROLL
 // #define OUTPUT_READABLE_REALACCEL
 // #define OUTPUT_READABLE_WORLDACCEL
 // #define OUTPUT_TEAPOT
@@ -79,6 +79,11 @@ public:
     float getFilteredYaw() const { return _filteredYaw; }
     float getFilteredPitch() const { return _filteredPitch; }
     float getFilteredRoll() const { return _filteredRoll; }
+
+    float getW() const { return _orient.q.w; }
+    float getX() const { return _orient.q.x; }
+    float getY() const { return _orient.q.y; }
+    float getZ() const { return _orient.q.z; }
 
     // Direct access to the underlying driver
     MPU6050 &device() { return _mpu; }

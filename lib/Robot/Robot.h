@@ -6,12 +6,10 @@
 #include <Adafruit_SoftServo.h>
 #include "ApplicationFunctionSet_xxx0.h"
 #include "LED_control.h"
-#include "Buzzer_control.h"
 
 class Robot
 {
 private:
-    MPU6050Wrapper imu;
     DeviceDriverSet_ULTRASONIC ultrasonic;
 
     ApplicationFunctionSet Application_FunctionSet;
@@ -47,8 +45,8 @@ private:
     // float _reverseAngle(float angle);       // Reverse an angle if head is reversed
 
 public:
-    DeviceDriverSet_passiveBuzzer buzzer; // added buzzer for audio cues
     DeviceDriverSet_RBGLED led;
+    MPU6050Wrapper imu;
     // DeviceDriverSet_Motor motor;
     Adafruit_SoftServo servo;
     Robot(bool &manualMode);
@@ -82,5 +80,6 @@ public:
     float getYaw() const { return imu.getFilteredYaw(); }
     float getPitch() const { return imu.getFilteredPitch(); }
     float getRow() const { return imu.getFilteredRoll(); }
+
     uint16_t getDistance() const { return _lastFilteredDistance; }
 };
