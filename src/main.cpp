@@ -25,17 +25,46 @@ void setup()
     Serial.println(robot.getDistance());
   }
 
-  robot.led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Cornsilk);
+  robot.led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::LawnGreen);
   delay(1000);
   robot.led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
 
+  // go forward
   robot.moveToWall(39, 180);
-  robot.turnToAngle(-90, 3.0, false);
-  robot.update();
 
-  robot.moveToWall(39, 180);
+  // Shift left 22 cm
+  robot.turnToAngle(-90, 3.0, false);
+  robot.moveToWall(17, 180);
+
+  // Lane 2 (down)
   robot.turnToAngle(-180, 3.0, false);
+  robot.moveToWall(39, 180);
+
+  // Shift left 22 cm
+  robot.turnToAngle(-90, 3.0, false);
+  robot.moveToWall(17, 180);
+
+  // Lane 3 (up)
+  robot.turnToAngle(0, 3.0, false);
+  robot.moveToWall(39, 180);
+
+  // Shift left 22 cm
+  robot.turnToAngle(-90, 3.0, false);
+  robot.moveToWall(17, 180);
+
+  // Lane 4 (down)
+  robot.turnToAngle(-180, 3.0, false);
+  robot.moveToWall(39, 180);
+
   robot.stop();
+
+  // robot.moveToWall(39, 180);
+  // robot.turnToAngle(-90, 3.0, false);
+  // robot.update();
+
+  // robot.moveToWall(39, 180);
+  // robot.turnToAngle(-180, 3.0, false);
+  // robot.stop();
 }
 
 void loop()
