@@ -6,34 +6,26 @@
  * @LastEditTime: 2019-10-15 10:32:19
  * @LastEditors: Please set LastEditors
  */
-#pragma once
-
 #include <HardwareSerial.h>
 #include <stdio.h>
 #include <string.h>
 #include "ApplicationFunctionSet_xxx0.h"
 #include "DeviceDriverSet_xxx0.h"
-#include "Buzzer_control.h"
+
 #include "ArduinoJson-v6.11.1.h" //ArduinoJson
-#include "Adafruit_SoftServo.h"
-#include "MPU6050Wrapper.h"
+#include "Buzzer_control.h"
+#include <Adafruit_SoftServo.h>
+extern Adafruit_SoftServo servo;
 
 #define _is_print 1
 #define _Test_print 0 // When testing, remember to set 0 after using the test to save controller resources and load.
 
 /*硬件设备成员对象序列*/
-extern bool MANUAL_MODE;
 DeviceDriverSet_Motor AppMotor;
 extern DeviceDriverSet_passiveBuzzer buzzer;
-extern Adafruit_SoftServo servo;
-extern unsigned long lastPacketTime;
-extern MPU6050Wrapper imu;
-
-float robotTargetYaw = 0;
 
 /*f(x) int */
-static boolean
-function_xxx(long x, long s, long e) // f(x)
+static boolean function_xxx(long x, long s, long e) // f(x)
 {
   if (s <= x && x <= e)
     return true;
@@ -45,38 +37,8 @@ Application_xxx Application_OwlBotxxx0;
 
 void ApplicationFunctionSet::ApplicationFunctionSet_Init(void)
 {
-  // Serial.begin(9600);
+  Serial.begin(9600);
   AppMotor.DeviceDriverSet_Motor_Init();
-}
-
-void _applyHeadingCorrection(uint8_t &speedA, uint8_t &speedB, float yaw)
-{
-  // yaw should be close to 0 for straight movement
-  // Negative yaw means robot is tilted left, so speed up right motor (B)
-  // Positive yaw means robot is tilted right, so speed up left motor (A)
-
-  const float YAW_THRESHOLD = 1.0f;  // Only correct if yaw error > threshold
-  const uint8_t CORRECTION_RATE = 3; // PWM adjustment per degree of yaw
-  const uint8_t MIN_SPEED = 100;     // Prevent motors from stalling
-  const uint8_t MAX_CORRECTION = 50; // Max PWM adjustment
-
-  if (fabs(yaw) > YAW_THRESHOLD)
-  {
-    uint8_t correction = min((uint8_t)(fabs(yaw) * CORRECTION_RATE), MAX_CORRECTION);
-
-    if (yaw < 0)
-    {
-      // Tilted left, speed up right motor (B)
-      speedA = max((uint8_t)(speedA - correction), MIN_SPEED);
-      speedB = min((uint8_t)(speedB + correction), 255);
-    }
-    else
-    {
-      // Tilted right, speed up left motor (A)
-      speedA = min((uint8_t)(speedA + correction), 255);
-      speedB = max((uint8_t)(speedB - correction), MIN_SPEED);
-    }
-  }
 }
 
 /*
@@ -90,10 +52,6 @@ void _applyHeadingCorrection(uint8_t &speedA, uint8_t &speedB, float yaw)
 $ Shenzhen, China:Elegoo & HOU Changhua & 2019-09
  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 */
-
-// produce intermittent beeps while actually turning left or right
-// maintain static timer across calls
-
 static void ApplicationFunctionSet_OwlBotMotionControl(OwlBotMotionControl direction, uint8_t speed)
 {
   ApplicationFunctionSet Application_FunctionSet;
@@ -103,10 +61,6 @@ static void ApplicationFunctionSet_OwlBotMotionControl(OwlBotMotionControl direc
     /* code */
     servo.write(180);
     servo.refresh();
-
-    robotTargetYaw = imu.getFilteredYaw() + 180.0f;
-    buzzer.DeviceDriverSet_passiveBuzzer_controlMonosyllabic(0, 100);
-
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_just, /*speed_A*/ speed,
                                            /*direction_B*/ direction_back, /*speed_B*/ speed, /*controlED*/ control_enable); // Motor control
     break;
@@ -114,20 +68,13 @@ static void ApplicationFunctionSet_OwlBotMotionControl(OwlBotMotionControl direc
     /* code */
     servo.write(180);
     servo.refresh();
-
-    robotTargetYaw = imu.getFilteredYaw() + 180.0f;
-    buzzer.DeviceDriverSet_passiveBuzzer_controlMonosyllabic(0, 100);
-
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_back, /*speed_A*/ speed,
                                            /*direction_B*/ direction_just, /*speed_B*/ speed, /*controlED*/ control_enable); // Motor control
     break;
   case /* constant-expression */ Forward:
     /* code */
-    // backwards tech, up
     servo.write(180);
     servo.refresh();
-    buzzer.DeviceDriverSet_passiveBuzzer_controlMonosyllabic(0, 100);
-
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_just, /*speed_A*/ speed,
                                            /*direction_B*/ direction_just, /*speed_B*/ speed, /*controlED*/ control_enable); // Motor control
     break;
@@ -135,17 +82,6 @@ static void ApplicationFunctionSet_OwlBotMotionControl(OwlBotMotionControl direc
     /* code */
     servo.write(75);
     servo.refresh();
-
-    float currentYaw = imu.getFilteredYaw();
-    uint8_t speedA = speed;
-    uint8_t speedB = speed;
-    _applyHeadingCorrection(speedA, speedB, currentYaw - robotTargetYaw);
-
-    AppMotor.DeviceDriverSet_Motor_control(
-        direction_back, speedA, // Motor A: forward with corrected speed
-        direction_back, speedB, // Motor B: forward with corrected speed
-        true);
-
     AppMotor.DeviceDriverSet_Motor_control(/*direction_A*/ direction_back, /*speed_A*/ speed,
                                            /*direction_B*/ direction_back, /*speed_B*/ speed, /*controlED*/ control_enable); // Motor control
     break;
@@ -242,11 +178,6 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
     SerialPortData += char(Serial.read());
     _delay(6); /*Necessary delay to prevent data loss*/
   }
-
-  // if ((SerialPortData.length() > 0))
-  // {
-  //   MANUAL_MODE = true;
-  // }
   if ((SerialPortData.length() > 0) && (SerialPortData != "") && (true == SerialPortData.endsWith("}")))
   {
 #if _Test_print
@@ -257,17 +188,12 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
     DeserializationError error = deserializeJson(doc, SerialPortData); // 反序列化JSON数据
     if (!error)                                                        // 检查反序列化是否成功
     {
-      lastPacketTime = millis();
       int control_mode_N = doc["N"];
-#if _Test_print
-      Serial.println(control_mode_N);
-#endif
       char buf[3];
       uint8_t temp = doc["H"];
       sprintf(buf, "%d", temp);
       CommandSerialNumber = buf; // 获取新命令的序号
-                                 // 3#解析并更新控制命令的信号量值
-
+      // 3#解析并更新控制命令的信号量值
       switch (control_mode_N) /*以下代码块请结合小车通讯协议V.docx 查看*/
       {
       case 1: /*<命令：N 1> */
@@ -283,11 +209,8 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
       case 6: /*<命令：N 6>*/
         break;
       case 7: /*<命令：N 7>*/
-        // MANUAL_MODE = true;
-
         break;
       case 8: /*<命令：N 8>*/
-
         break;
       case 9: /*<命令：N 9>*/
         break;
@@ -302,7 +225,6 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
       case 103: /*<命令：N 103>*/
         break;
       case 110: /*<命令：N 110>*/
-        Application_OwlBotxxx0.Functional_Mode = CMD_ClearAllFunctions_Standby_mode;
         break;
       case 100:                                                                      /*<命令：N 100>*/
         Application_OwlBotxxx0.Functional_Mode = CMD_ClearAllFunctions_Standby_mode; /*清除功能：进入空闲模式*/
@@ -313,7 +235,6 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
       case 104: /*<命令：N 104>*/
         break;
       case 105: /*<命令：N 105>*/
-        MANUAL_MODE = !MANUAL_MODE;
         break;
       case 102: /*<命令：N 102> :摇杆控制命令*/
         Application_OwlBotxxx0.Functional_Mode = Rocker_mode;
@@ -336,22 +257,22 @@ void ApplicationFunctionSet::ApplicationFunctionSet_SerialPortDataAnalysis(void)
           // Application_OwlBotxxx0.Motion_Control = Right;
           Application_OwlBotxxx0.Motion_Control = Right;
           break;
-        // case 5:
-        //   // Application_OwlBotxxx0.Motion_Control = LeftForward;
-        //   Application_OwlBotxxx0.Motion_Control = RightBackward;
-        //   break;
-        // case 6:
-        //   // Application_OwlBotxxx0.Motion_Control = LeftBackward;
-        //   Application_OwlBotxxx0.Motion_Control = RightForward;
-        //   break;
-        // case 7:
-        //   // Application_OwlBotxxx0.Motion_Control = RightForward;
-        //   Application_OwlBotxxx0.Motion_Control = LeftBackward;
-        //   break;
-        // case 8:
-        //   // Application_OwlBotxxx0.Motion_Control = RightBackward;
-        //   Application_OwlBotxxx0.Motion_Control = LeftForward;
-        //   break;
+        case 5:
+          // Application_OwlBotxxx0.Motion_Control = LeftForward;
+          Application_OwlBotxxx0.Motion_Control = RightBackward;
+          break;
+        case 6:
+          // Application_OwlBotxxx0.Motion_Control = LeftBackward;
+          Application_OwlBotxxx0.Motion_Control = RightForward;
+          break;
+        case 7:
+          // Application_OwlBotxxx0.Motion_Control = RightForward;
+          Application_OwlBotxxx0.Motion_Control = LeftBackward;
+          break;
+        case 8:
+          // Application_OwlBotxxx0.Motion_Control = RightBackward;
+          Application_OwlBotxxx0.Motion_Control = LeftForward;
+          break;
         case 9:
           Application_OwlBotxxx0.Motion_Control = stop_it;
           break;

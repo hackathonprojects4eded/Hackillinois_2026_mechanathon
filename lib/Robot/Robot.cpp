@@ -40,15 +40,15 @@ void Robot::update()
     Application_FunctionSet.ApplicationFunctionSet_Rocker();
     Application_FunctionSet.CMD_ClearAllFunctionsXXX();
 
-    if (millis() - lastPacketTime > WATCHDOG_TIMEOUT_MS)
-    {
-        AppMotor.DeviceDriverSet_Motor_control(
-            direction_void, 0,
-            direction_void, 0,
-            control_enable);
-        Application_OwlBotxxx0.Functional_Mode = Standby_mode;
-        Serial.println("Watch dog called");
-    }
+    // if (millis() - lastPacketTime > WATCHDOG_TIMEOUT_MS)
+    // {
+    //     AppMotor.DeviceDriverSet_Motor_control(
+    //         direction_void, 0,
+    //         direction_void, 0,
+    //         control_enable);
+    //     Application_OwlBotxxx0.Functional_Mode = Standby_mode;
+    //     Serial.println("Watch dog called");
+    // }
 
     // imu.update();
     Serial.println("Update");

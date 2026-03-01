@@ -12,7 +12,7 @@ Adafruit_SoftServo servo;
 MPU6050Wrapper imu;
 
 unsigned long lastPacketTime = 0;
-unsigned long WATCHDOG_TIMEOUT_MS = 100; // stop if no packet for 500ms
+unsigned long WATCHDOG_TIMEOUT_MS = 250; // stop if no packet for 500ms
 
 void setup()
 {
