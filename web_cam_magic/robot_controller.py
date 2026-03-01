@@ -25,7 +25,8 @@ BLE_SERVICE_UUID = "0000ffe0-0000-1000-8000-00805f9b34fb"
 BLE_WRITE_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb"
 BLE_NOTIFY_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb"
 
-IDLE_INTERVAL_MS = 100  # ms between idle / held-direction packets
+IDLE_INTERVAL_MS = 250  # how often to send idle packet (ms)
+MOTION_REPEAT_MS = 200  # how often to re-send a held direction (ms)
 
 
 # ======================================================================
@@ -271,6 +272,7 @@ class RobotControllerGUI:
 
         # key-hold state
         self._held_direction = None
+        self._last_sent_direction = None  # track what was last sent to avoid repeats
 
         # serial buffer (BLE frames may be partial)
         self._serial_buf = ""

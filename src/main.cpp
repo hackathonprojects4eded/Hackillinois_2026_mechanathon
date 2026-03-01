@@ -6,7 +6,7 @@
 bool MANUAL_MODE = true;
 Robot robot(MANUAL_MODE);
 
-DeviceDriverSet_passiveBuzzer buzzer;
+extern DeviceDriverSet_passiveBuzzer buzzer;
 
 void setup()
 {
