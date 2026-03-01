@@ -29,48 +29,23 @@ void setup()
   delay(1000);
   robot.led.DeviceDriverSet_RBGLED_xxx((uint16_t)(0), 5, CRGB::Black);
 
-  // go forward
-  // robot.moveToWall(39, 180);
+  // delay(5000);
 
-  // // Shift left 22 cm
-  // robot.turnToAngle(-90, 3.0, false);
-  // robot.moveToWall(17, 180);
+  // robot.moveToWall(30, 180);
 
-  // // Lane 2 (down)
   // robot.turnToAngle(-180, 3.0, false);
-  // robot.moveToWall(39, 180);
+  // robot.moveToWall(30, 180);
 
-  // // Shift left 22 cm
-  // robot.turnToAngle(-90, 3.0, false);
-  // robot.moveToWall(17, 180);
-
-  // // Lane 3 (up)
   // robot.turnToAngle(0, 3.0, false);
-  // robot.moveToWall(39, 180);
+  // robot.moveToWall(30, 180);
 
-  // // Shift left 22 cm
-  // robot.turnToAngle(-90, 3.0, false);
-  // robot.moveToWall(17, 180);
-
-  // // Lane 4 (down)
-  // robot.turnToAngle(-180, 3.0, false);
-  // robot.moveToWall(39, 180);
-
-  // robot.stop();
-
-  // robot.moveToWall(39, 180);
-  // robot.turnToAngle(-90, 3.0, false);
-  // robot.update();
-
-  // robot.moveToWall(39, 180);
-  // robot.turnToAngle(-180, 3.0, false);
   // robot.stop();
 }
 
 void loop()
 {
   robot.update();
-  // Serial.println(robot.getRow());
+  Serial.println(robot.getRow());
 
   // float roll = robot.getRow(); // this is actually pitch
   // float pitch = roll;          // fix sensor frame
